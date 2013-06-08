@@ -1,22 +1,24 @@
 
-Hello.
+Hi,
 
-This is an old hack that clones the Future Crew MDP player interface.
-It was writen in February 1997 and revised in July and December of the
-same year, for xmp 1.1. When rediscovered, mdp.c was last touched in
-December 15th, 1997. Only a couple of adjustments were needed to make
-it work with the current xmp code.
+So here's xmdp again, this time built using libxmp 4.2. It was initially
+written in 1997 with a revision in 2005, and in this incarnation it still
+doesn't have a file browser (so it's not, despite the name, a real
+musicdisk player).
 
-The code is supposed to work with SVGAlib as well but I believe it's
-all but extinct by now, so let's stay with the X11 version that still
-works quite nicely. It's interesting to see it playing Skaven's remakes
-of old classics in IT format.
+Those who were around back in 1993 will recognize xmdp as something that
+looks like Future Crew's MusicDiskPlayer. MDP was distributed with Purple
+Motion's Journey I and II, and Skaven's Chaotic Mind musicdisks.
 
-To build xmdp, tweak the Makefile as needed (yeah, like in old days!).
+Xmdp is being published mostly as an example of an application using libxmp.
+It can become more intersting once it becomes a full MDP clone (so maybe one
+day we can have it loading the original MDI files and playing the old DOS
+musicdisks).
 
-Want to finish it to make a full MDP clone? Send me the patch!
+Until then, it's only a retro-looking module player.
 
-Cheers,
+Enjoy!
+
 Claudio Matsuoka, cmatsuoka@gmail.com
-Wed Feb  9 00:17:15 BRST 2005
+Sat Jun  8 15:18:34 BRT 2013
 

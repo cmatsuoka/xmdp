@@ -1,8 +1,4 @@
 
-For historical reasons, here's the original README file from 1997:
-
----
-
 xmdp, an MDP clone for X11/SVGAlib
 Copyright (C) 1997 by Claudio Matsuoka and Hipolito Carraro Jr.
 Raw keyboard functions Copyright (C) 1994 by Russel Marks
