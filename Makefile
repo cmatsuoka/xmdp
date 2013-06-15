@@ -5,6 +5,10 @@ LD = gcc
 LDFLAGS =
 LIBS = -L../../lib -lxmp -lm
 
+ifeq (Darwin,$(shell uname -s))
+	LDFLAGS := -framework Cocoa -lSDLmain
+endif
+
 all: xmdp
 
 xmdp: mdp.o font1.o font2.o
