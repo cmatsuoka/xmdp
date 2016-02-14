@@ -49,7 +49,7 @@ struct channel_info {
     writemsg(f, (x) - writemsg (f,0,0,s,-1,0), y, s, c, b)
 
 #define update_counter(a,b,y) {						\
-    if ((a) != (b)) {							\
+    if (mode_changed || (a) != (b)) {					\
 	sprintf(buf, "%d  ", (int)(a));					\
 	writemsg(&font2, 590, y, buf, 14, 9);				\
 	b = a;								\
@@ -71,8 +71,8 @@ static int palette[] = {
     0x3f, 0x14, 0x00,	/*  6 */	0x3f, 0x00, 0x00,	/*  7 */
     0x0d, 0x0d, 0x0d,	/*  8 */	0x0b, 0x10, 0x15,	/*  9 */
     0x0b, 0x15, 0x1a,	/* 10 */	0x05, 0x08, 0x10,	/* 11 */
-    0xd0, 0x00, 0x00,	/* 12 */	0x10, 0x14, 0x32,	/* 13 */
-    0x10, 0x18, 0x20,	/* 14 */	0xff, 0xff, 0xff	/* 15 */
+    0x0b, 0x10, 0x15,	/* 12 */	0x10, 0x14, 0x32,	/* 13 */
+    0x15, 0x1e, 0x27,	/* 14 */	0xff, 0xff, 0xff	/* 15 */
 };
 
 static SDL_Color color[16];
@@ -83,6 +83,7 @@ static int paused;
 static int end_of_song;
 static int volume;
 static int mode = MODE_MENU;
+static int mode_changed = 1;
 
 static inline void setcolor(int c)
 {
@@ -135,7 +136,6 @@ void drawhline (int x, int y, int w)
 	for (i = 0; i < w; i++)
 		drawpixel(x + i, y);
 }
-
 
 void drawvline (int x, int y, int h)
 {
@@ -196,38 +196,6 @@ int init_video()
 	return 0;
 }
 
-void prepare_screen()
-{
-	int i, j, x, y;
-
-	setcolor(10);
-	drawhline(0, 0, 640);
-	drawhline(0, 1, 640);
-	setcolor(9);
-	for (i = 2; i < 72; i++)
-		drawhline(0, i, 640);
-	setcolor(11);
-	drawhline(0, 72, 640);
-	drawhline(0, 73, 640);
-	setcolor(8);
-	for (i = 0; i < 39; i++) {
-		x = i * 16 + 15;
-		drawvline(x, 85, 386);
-		for (j = 0; j < 17; j++) {
-			y = 470 - j * 24;
-			drawhline(x - 1, y, 3);
-			if (!(j % 2))
-				drawhline(x - 1, y - 1, 3);
-		}
-	}
-	setcolor(10);
-	drawhline(10, 65, 129);
-	drawvline(138, 57, 9);
-	setcolor(11);
-	drawhline(10, 57, 129);
-	drawvline(10, 57, 9);
-}
-
 void draw_lines(int i, int a, int b, int c)
 {
 	int y = a;
@@ -261,6 +229,7 @@ void draw_bars()
 		if (ci->note == 0)
 			continue;
 
+		/* find pitch */
 		p = 538 - ci->note * 4 - ci->bend / 25;
 
 		if (p < 86)
@@ -268,6 +237,10 @@ void draw_bars()
 		if (p > 470)
 			p = 470;
 		v++;
+
+		if (mode_changed) {
+			y2 = y3 = p;	
+		}
 
 		ci->y2 = y0 = p - v;
 		ci->y3 = y1 = p + v;
@@ -296,6 +269,10 @@ void draw_bars()
 void draw_progress(int pos)
 {
 	static int i, oldpos = 0;
+
+	if (mode_changed) {
+		oldpos = 0;
+	}
 
 	if (pos == oldpos)
 		return;
@@ -387,8 +364,76 @@ void shadowmsg(struct font_header *f, int x, int y, char *s, int c, int b)
 	writemsg(f, x, y, s, c, b);
 }
 
+void prepare_menu_screen()
+{
+	int i;
+
+	for (i = 0; i < 480; i++) {
+		setcolor(12);
+		drawhline(0, i, 64);
+		drawhline(576, i, 64);
+	}
+
+	SDL_UpdateRect(screen, 0, 0, 640, 480);
+}
+
+void prepare_player_screen()
+{
+	int i, j, x, y;
+
+	memset(screen->pixels, 0, screen->w * screen->h * screen->format->BytesPerPixel);
+
+	setcolor(10);
+	drawhline(0, 0, 640);
+	drawhline(0, 1, 640);
+	setcolor(9);
+	for (i = 2; i < 72; i++)
+		drawhline(0, i, 640);
+	setcolor(11);
+	drawhline(0, 72, 640);
+	drawhline(0, 73, 640);
+	setcolor(8);
+	for (i = 0; i < 39; i++) {
+		x = i * 16 + 15;
+		drawvline(x, 85, 386);
+		for (j = 0; j < 17; j++) {
+			y = 470 - j * 24;
+			drawhline(x - 1, y, 3);
+			if (!(j % 2))
+				drawhline(x - 1, y - 1, 3);
+		}
+	}
+	setcolor(10);
+	drawhline(10, 65, 129);
+	drawvline(138, 57, 9);
+	setcolor(11);
+	drawhline(10, 57, 129);
+	drawvline(10, 57, 9);
+
+	rightmsg(&font2, 500, 36, "Spacebar to pause", 14, -1);
+	rightmsg(&font2, 500, 52, "+/- to change volume", 14, -1);
+	rightmsg(&font2, 500, 20, "F10 to quit", 14, -1);
+	rightmsg(&font2, 500, 68, "Arrows to change pattern", 14, -1);
+	writemsg(&font2, 540, 20, "Ord", 14, -1);
+	writemsg(&font2, 540, 36, "Pat", 14, -1);
+	writemsg(&font2, 540, 52, "Row", 14, -1);
+	writemsg(&font2, 540, 68, "Vol", 14, -1);
+	writemsg(&font2, 580, 20, ":", 14, -1);
+	writemsg(&font2, 580, 36, ":", 14, -1);
+	writemsg(&font2, 580, 52, ":", 14, -1);
+	writemsg(&font2, 580, 68, ":", 14, -1);
+
+	SDL_UpdateRect(screen, 0, 0, 640, 480);
+}
+
 static void process_menu_events(int key)
 {
+	switch (key) {
+	case SDLK_UP:
+		break;
+	case SDLK_DOWN:
+		break;
+	}
 }
 
 static void process_player_events(int key)
@@ -447,9 +492,12 @@ static void process_events()
 		case SDLK_ESCAPE:
 			if (mode == MODE_MENU) {
 				mode = MODE_PLAYER;
+				prepare_player_screen();
 			} else {
 				mode = MODE_MENU;
+				prepare_menu_screen();
 			}
+			mode_changed = 1;
 			break;
 		default:
 			if (mode == MODE_MENU) {
@@ -462,15 +510,19 @@ static void process_events()
 }
 
 
-static void draw_menu()
+static void draw_menu_screen()
 {
 }
 
-static void draw_screen(struct xmp_module_info *mi, struct xmp_frame_info *fi)
+static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info *fi)
 {
 	static int pos = -1, pat = -1, row = -1, vol = -1;
 	char buf[80];
 	int i;
+
+	if (mode_changed) {
+		shadowmsg(&font1, 10, 26, mi->mod->name, 15, -1);
+	}
 
 	update_counter(fi->pos, pos, 20);
 	update_counter(fi->pattern, pat, 36);
@@ -582,26 +634,10 @@ int main(int argc, char **argv)
 	}
 
 	init_video();
-	prepare_screen();
-
-	rightmsg(&font2, 500, 36, "Spacebar to pause", 14, -1);
-	rightmsg(&font2, 500, 52, "+/- to change volume", 14, -1);
-	rightmsg(&font2, 500, 20, "F10 to quit", 14, -1);
-	rightmsg(&font2, 500, 68, "Arrows to change pattern", 14, -1);
-	writemsg(&font2, 540, 20, "Ord", 14, -1);
-	writemsg(&font2, 540, 36, "Pat", 14, -1);
-	writemsg(&font2, 540, 52, "Row", 14, -1);
-	writemsg(&font2, 540, 68, "Vol", 14, -1);
-	writemsg(&font2, 580, 20, ":", 14, -1);
-	writemsg(&font2, 580, 36, ":", 14, -1);
-	writemsg(&font2, 580, 52, ":", 14, -1);
-	writemsg(&font2, 580, 68, ":", 14, -1);
-
-	SDL_UpdateRect(screen, 0, 0, 640, 480);
+	prepare_menu_screen();
 
 	xmp_start_player(ctx, SRATE, 0);
 	xmp_get_module_info(ctx, &mi);
-	shadowmsg(&font1, 10, 26, mi.mod->name, 15, -1);
 
 	end_of_song = 0;
 	volume = 64;
@@ -614,10 +650,11 @@ int main(int argc, char **argv)
 		SDL_UnlockAudio();
 
 		if (mode == MODE_MENU) {
-			draw_menu();
+			draw_menu_screen();
 		} else {
-			draw_screen(&mi, &fi);
+			draw_player_screen(&mi, &fi);
 		}
+		mode_changed = 0;
 		usleep(100000);
 	}
 
