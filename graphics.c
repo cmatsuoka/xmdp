@@ -3,7 +3,7 @@
 #include "font.h"
 
 SDL_Surface *screen;
-SDL_Surface *menu;
+SDL_Surface *menu_screen;
 
 static int palette[] = {
     0x00, 0x00, 0x00,	/*  0 */	0x3f, 0x3f, 0x25,	/*  1 */
@@ -25,15 +25,15 @@ void setcolor(int c)
 	__color = c;
 }
 
-static inline void put_pixel(int x, int y, int c)
+static inline void put_pixel(SDL_Surface *surf, int x, int y, int c)
 {
 	Uint32 pixel;
 	Uint8 *bits, bpp;
 
 	pixel = mapped_color[c];
 
-	bpp = screen->format->BytesPerPixel;
-	bits = ((Uint8 *) screen->pixels) + y * screen->pitch + x * bpp;
+	bpp = surf->format->BytesPerPixel;
+	bits = ((Uint8 *) surf->pixels) + y * surf->pitch + x * bpp;
 
 	/* Set the pixel */
 	switch (bpp) {
@@ -45,12 +45,12 @@ static inline void put_pixel(int x, int y, int c)
 		break;
 	case 3:{
 		Uint8 r, g, b;
-		r = (pixel >> screen->format->Rshift) & 0xff;
-		g = (pixel >> screen->format->Gshift) & 0xff;
-		b = (pixel >> screen->format->Bshift) & 0xff;
-		*((bits) + screen->format->Rshift / 8) = r;
-		*((bits) + screen->format->Gshift / 8) = g;
-		*((bits) + screen->format->Bshift / 8) = b;
+		r = (pixel >> surf->format->Rshift) & 0xff;
+		g = (pixel >> surf->format->Gshift) & 0xff;
+		b = (pixel >> surf->format->Bshift) & 0xff;
+		*((bits) + surf->format->Rshift / 8) = r;
+		*((bits) + surf->format->Gshift / 8) = g;
+		*((bits) + surf->format->Bshift / 8) = b;
 		}
 		break;
 	case 4:
@@ -59,9 +59,9 @@ static inline void put_pixel(int x, int y, int c)
 	}
 }
 
-static void drawpixel(int x, int y)
+static void drawpixel(SDL_Surface *surf, int x, int y)
 {
-	put_pixel(x, y, __color);
+	put_pixel(surf, x, y, __color);
 }
 
 void drawhline(int x, int y, int w)
@@ -69,7 +69,7 @@ void drawhline(int x, int y, int w)
 	int i;
 
 	for (i = 0; i < w; i++) {
-		drawpixel(x + i, y);
+		drawpixel(screen, x + i, y);
 	}
 }
 
@@ -78,11 +78,11 @@ void drawvline(int x, int y, int h)
 	int i;
 
 	for (i = 0; i < h; i++) {
-		drawpixel(x, y + i);
+		drawpixel(screen, x, y + i);
 	}
 }
 
-int writemsg(struct font_header *f, int x, int y, char *s, int c, int b)
+int writemsg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b)
 {
 	int x1 = 0, y1 = 0;
 	unsigned int p, *ptr;
@@ -115,10 +115,10 @@ int writemsg(struct font_header *f, int x, int y, char *s, int c, int b)
 				if (c >= 0) {
 					if (p & 1) {
 						setcolor(c);
-						drawpixel(x + x1, y - y1);
+						drawpixel(surf, x + x1, y - y1);
 					} else if (b != -1) {
 						setcolor(b);
-						drawpixel(x + x1, y - y1);
+						drawpixel(surf, x + x1, y - y1);
 					}
 				}
 				p >>= 1;
@@ -128,7 +128,7 @@ int writemsg(struct font_header *f, int x, int y, char *s, int c, int b)
 			if (b != -1 && c != -1) {
 				setcolor(b);
 				for (; y1 < f->h; y1++)
-					drawpixel(x + x1, y - y1);
+					drawpixel(surf, x + x1, y - y1);
 			}
 
 			x1++;
@@ -138,13 +138,14 @@ int writemsg(struct font_header *f, int x, int y, char *s, int c, int b)
 		/* inter-character spacing */
 		if (b != -1 && c != -1) {
 			for (y1 = 0; y1 < f->h; y1++)
-				drawpixel(x + x1, y - y1);
+				drawpixel(surf, x + x1, y - y1);
 		}
 		x1++;
 	}
 
-	if (c != -1)
-		SDL_UpdateRect(screen, x, y - f->h + 1, x1, f->h);
+	if (c != -1) {
+		SDL_UpdateRect(surf, x, y - f->h + 1, x1, f->h);
+	}
 
 	return x1;
 }
@@ -173,12 +174,12 @@ int init_video()
 	}
 	atexit(SDL_Quit);
 
-	menu = SDL_CreateRGBSurface(SDL_SWSURFACE, 512, 960, 
+	menu_screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 512, 960, 
 			screen->format->BytesPerPixel * 8,
 			screen->format->Rmask, screen->format->Gmask,
 			screen->format->Bmask, screen->format->Amask);
 
-	if (menu == NULL) {
+	if (menu_screen == NULL) {
 		fprintf(stderr, "sdl: can't create menu surface: %s\n",
 			SDL_GetError());
 		return -1;

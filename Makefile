@@ -11,7 +11,7 @@ endif
 
 all: xmdp
 
-xmdp: mdp.o graphics.o font1.o font2.o
+xmdp: mdp.o graphics.o parse.o font1.o font2.o
 	$(LD) -o $@ $(LDFLAGS) $+ -lSDL $(LIBS)
 
 clean:

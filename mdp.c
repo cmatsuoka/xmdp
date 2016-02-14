@@ -45,13 +45,13 @@ struct channel_info {
 };
 
 
-#define rightmsg(f,x,y,s,c,b)						\
-    writemsg(f, (x) - writemsg (f,0,0,s,-1,0), y, s, c, b)
+#define rightmsg(surf,f,x,y,s,c,b)					\
+    writemsg(surf, f, (x) - writemsg(surf,f,0,0,s,-1,0), y, s, c, b)
 
 #define update_counter(a,b,y) {						\
     if (mode_changed || (a) != (b)) {					\
 	sprintf(buf, "%d  ", (int)(a));					\
-	writemsg(&font2, 590, y, buf, 14, 9);				\
+	writemsg(screen, &font2, 590, y, buf, 14, 9);			\
 	b = a;								\
     }									\
 }
@@ -164,10 +164,10 @@ void draw_progress(int pos)
 	SDL_UpdateRect(screen, 11, 58, 127, 7);
 }
 
-void shadowmsg(struct font_header *f, int x, int y, char *s, int c, int b)
+void shadowmsg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b)
 {
-	writemsg(f, x + 2, y + 2, s, 0, b);
-	writemsg(f, x, y, s, c, b);
+	writemsg(surf, f, x + 2, y + 2, s, 0, b);
+	writemsg(surf, f, x, y, s, c, b);
 }
 
 void prepare_menu_screen()
@@ -176,8 +176,7 @@ void prepare_menu_screen()
 
 	for (i = 0; i < 480; i++) {
 		setcolor(9);
-		drawhline(0, i, 64);
-		drawhline(576, i, 64);
+		drawhline(0, i, 640);
 	}
 
 	SDL_UpdateRect(screen, 0, 0, 640, 480);
@@ -216,18 +215,18 @@ void prepare_player_screen()
 	drawhline(10, 57, 129);
 	drawvline(10, 57, 9);
 
-	rightmsg(&font2, 500, 36, "Spacebar to pause", 14, -1);
-	rightmsg(&font2, 500, 52, "+/- to change volume", 14, -1);
-	rightmsg(&font2, 500, 20, "F10 to quit", 14, -1);
-	rightmsg(&font2, 500, 68, "Arrows to change pattern", 14, -1);
-	writemsg(&font2, 540, 20, "Ord", 14, -1);
-	writemsg(&font2, 540, 36, "Pat", 14, -1);
-	writemsg(&font2, 540, 52, "Row", 14, -1);
-	writemsg(&font2, 540, 68, "Vol", 14, -1);
-	writemsg(&font2, 580, 20, ":", 14, -1);
-	writemsg(&font2, 580, 36, ":", 14, -1);
-	writemsg(&font2, 580, 52, ":", 14, -1);
-	writemsg(&font2, 580, 68, ":", 14, -1);
+	rightmsg(screen, &font2, 500, 36, "Spacebar to pause", 14, -1);
+	rightmsg(screen, &font2, 500, 52, "+/- to change volume", 14, -1);
+	rightmsg(screen, &font2, 500, 20, "F10 to quit", 14, -1);
+	rightmsg(screen, &font2, 500, 68, "Arrows to change pattern", 14, -1);
+	writemsg(screen, &font2, 540, 20, "Ord", 14, -1);
+	writemsg(screen, &font2, 540, 36, "Pat", 14, -1);
+	writemsg(screen, &font2, 540, 52, "Row", 14, -1);
+	writemsg(screen, &font2, 540, 68, "Vol", 14, -1);
+	writemsg(screen, &font2, 580, 20, ":", 14, -1);
+	writemsg(screen, &font2, 580, 36, ":", 14, -1);
+	writemsg(screen, &font2, 580, 52, ":", 14, -1);
+	writemsg(screen, &font2, 580, 68, ":", 14, -1);
 
 	SDL_UpdateRect(screen, 0, 0, 640, 480);
 }
@@ -327,7 +326,7 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	int i;
 
 	if (mode_changed) {
-		shadowmsg(&font1, 10, 26, mi->mod->name, 15, -1);
+		shadowmsg(screen, &font1, 10, 26, mi->mod->name, 15, -1);
 	}
 
 	update_counter(fi->pos, pos, 20);
@@ -422,9 +421,11 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (!argv[optind]) {
-		usage();
-		exit(1);
+	if (parse_mdi() < 0) {
+		if (!argv[optind]) {
+			usage();
+			exit(1);
+		}
 	}
 
 	if (sound_init(SRATE, 2) < 0) {
