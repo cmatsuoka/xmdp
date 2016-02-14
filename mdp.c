@@ -33,6 +33,9 @@
 #define MAX_TIMER 1600		/* Expire time */
 #define SRATE 44100		/* Sampling rate */
 
+#define MODE_MENU   0		/* Song menu screen */
+#define MODE_PLAYER 1		/* Player screen */
+
 struct channel_info {
     int timer;
     int vol;
@@ -58,6 +61,7 @@ extern struct font_header font1;
 extern struct font_header font2;
 
 static SDL_Surface *screen;
+static SDL_Surface *menu;
 static struct channel_info channel_info[40];
 
 static int palette[] = {
@@ -78,6 +82,7 @@ static xmp_context ctx;
 static int paused;
 static int end_of_song;
 static int volume;
+static int mode = MODE_MENU;
 
 static inline void setcolor(int c)
 {
@@ -165,6 +170,17 @@ int init_video()
 		return -1;
 	}
 	atexit(SDL_Quit);
+
+	menu = SDL_CreateRGBSurface(SDL_SWSURFACE, 512, 960, 
+			screen->format->BytesPerPixel * 8,
+			screen->format->Rmask, screen->format->Gmask,
+			screen->format->Bmask, screen->format->Amask);
+
+	if (menu == NULL) {
+		fprintf(stderr, "sdl: can't create menu surface: %s\n",
+			SDL_GetError());
+		return -1;
+	}
 
 	SDL_WM_SetCaption("xmdp", "xmdp");
 
@@ -371,54 +387,84 @@ void shadowmsg(struct font_header *f, int x, int y, char *s, int c, int b)
 	writemsg(f, x, y, s, c, b);
 }
 
-void process_events()
+static void process_menu_events(int key)
+{
+}
+
+static void process_player_events(int key)
+{
+	switch (key) {
+	case SDLK_SPACE:
+		SDL_PauseAudio(paused ^= 1);
+		break;
+	case SDLK_LEFT:
+		xmp_prev_position(ctx);
+		SDL_PauseAudio(paused = 0);
+		break;
+	case SDLK_RIGHT:
+		xmp_next_position(ctx);
+		SDL_PauseAudio(paused = 0);
+		break;
+	case SDLK_MINUS:
+	case SDLK_KP_MINUS:
+		volume--;
+		if (volume < 0)
+			volume = 0;
+		xmp_set_player(ctx, XMP_PLAYER_VOLUME,
+						100 * volume / 64);
+		SDL_PauseAudio(paused = 0);
+		break;
+	case SDLK_PLUS:
+	case SDLK_KP_PLUS:
+	case SDLK_EQUALS:
+		volume++;
+		if (volume > 64)
+			volume = 64;
+		xmp_set_player(ctx, XMP_PLAYER_VOLUME,
+						100 * volume / 64);
+		SDL_PauseAudio(paused = 0);
+		break;
+	}
+}
+
+static void process_events()
 {
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event) > 0) {
+		int key;
+
 		if (event.type != SDL_KEYDOWN)
 			continue;
 
-		switch ((int)event.key.keysym.sym) {
+		key = (int)event.key.keysym.sym;
+
+		switch (key) {
 		case SDLK_F10:
-		case SDLK_ESCAPE:
 			xmp_stop_module(ctx);
 			SDL_PauseAudio(paused = 0);
 			break;
-		case SDLK_SPACE:
-			SDL_PauseAudio(paused ^= 1);
+		case SDLK_ESCAPE:
+			if (mode == MODE_MENU) {
+				mode = MODE_PLAYER;
+			} else {
+				mode = MODE_MENU;
+			}
 			break;
-		case SDLK_LEFT:
-			xmp_prev_position(ctx);
-			SDL_PauseAudio(paused = 0);
-			break;
-		case SDLK_RIGHT:
-			xmp_next_position(ctx);
-			SDL_PauseAudio(paused = 0);
-			break;
-		case SDLK_MINUS:
-		case SDLK_KP_MINUS:
-			volume--;
-			if (volume < 0)
-				volume = 0;
-			xmp_set_player(ctx, XMP_PLAYER_VOLUME,
-							100 * volume / 64);
-			SDL_PauseAudio(paused = 0);
-			break;
-		case SDLK_PLUS:
-		case SDLK_KP_PLUS:
-		case SDLK_EQUALS:
-			volume++;
-			if (volume > 64)
-				volume = 64;
-			xmp_set_player(ctx, XMP_PLAYER_VOLUME,
-							100 * volume / 64);
-			SDL_PauseAudio(paused = 0);
-			break;
+		default:
+			if (mode == MODE_MENU) {
+				process_menu_events(key);
+			} else {
+				process_player_events(key);
+			}
 		}
 	}
 }
 
+
+static void draw_menu()
+{
+}
 
 static void draw_screen(struct xmp_module_info *mi, struct xmp_frame_info *fi)
 {
@@ -566,7 +612,12 @@ int main(int argc, char **argv)
 		SDL_LockAudio();
 		xmp_get_frame_info(ctx, &fi);
 		SDL_UnlockAudio();
-		draw_screen(&mi, &fi);
+
+		if (mode == MODE_MENU) {
+			draw_menu();
+		} else {
+			draw_screen(&mi, &fi);
+		}
 		usleep(100000);
 	}
 
