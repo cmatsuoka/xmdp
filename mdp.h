@@ -12,8 +12,6 @@ struct menu_entry {
 	char *filename;
 	char *title;
 	char *year;
-	char *channels;
-	char *time;
 	char *comment[MAX_COMMENT];
 };
 

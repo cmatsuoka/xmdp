@@ -188,10 +188,8 @@ void prepare_menu_screen()
 
 	shadowmsg(menu_screen, &font1, 2, 200, e->title, 15, -1);
 	rightmsg(menu_screen, &font2, 510, 200, e->year, 15, -1);
-	writemsg(menu_screen, &font2, 2, 222, e->channels, 14, -1);
-	writemsg(menu_screen, &font2, 2, 240, e->time, 14, -1);
 	for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
-		writemsg(menu_screen, &font2, 2, 258 + 18 * i, e->comment[i], 14, -1);
+		shadowmsg(menu_screen, &font2, 2, 222 + 18 * i, e->comment[i], 12, -1);
 	}
 
 	SDL_BlitSurface(menu_screen, 0, screen, &r);
