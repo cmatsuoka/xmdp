@@ -68,6 +68,7 @@ static int end_of_song;
 static int volume;
 static int mode = MODE_MENU;
 static int mode_changed = 1;
+static int current_mod;
 
 
 void draw_lines(int i, int a, int b, int c)
@@ -172,12 +173,27 @@ void shadowmsg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, 
 
 void prepare_menu_screen()
 {
+	SDL_Rect r = { 64, 0, 512, 480 };
+	struct menu_entry *e;
 	int i;
 
 	for (i = 0; i < 480; i++) {
 		setcolor(9);
 		drawhline(0, i, 640);
 	}
+
+	e = &menu.entry[current_mod];
+
+	shadowmsg(menu_screen, &font1, 2, 200, e->title, 15, -1);
+	rightmsg(menu_screen, &font2, 510, 200, e->year, 15, -1);
+	writemsg(menu_screen, &font2, 2, 222, e->channels, 14, -1);
+	writemsg(menu_screen, &font2, 2, 240, e->time, 14, -1);
+	for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
+		writemsg(menu_screen, &font2, 2, 258 + 18 * i, e->comment[i], 14, -1);
+	}
+
+	SDL_BlitSurface(menu_screen, 0, screen, &r);
+
 
 	SDL_UpdateRect(screen, 0, 0, 640, 480);
 }

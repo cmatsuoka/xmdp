@@ -4,9 +4,6 @@
 #include <SDL/SDL.h>
 #include "font.h"
 
-extern SDL_Surface *screen;
-extern SDL_Surface *menu_screen;
-
 #define MAX_ENTRIES 30
 #define MAX_TITLES  10
 #define MAX_COMMENT 25
@@ -25,6 +22,10 @@ struct menu {
 	struct menu_entry entry[MAX_ENTRIES];
 	char *lastline;
 };
+
+extern SDL_Surface *screen;
+extern SDL_Surface *menu_screen;
+extern struct menu menu;
 
 void setcolor(int);
 void drawhline(int, int, int);
