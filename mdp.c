@@ -177,10 +177,12 @@ void prepare_menu_screen()
 	struct menu_entry *e;
 	int i;
 
+	setcolor(9);
 	for (i = 0; i < 480; i++) {
-		setcolor(9);
 		drawhline(0, i, 640);
 	}
+
+	fill(menu_screen);
 
 	e = &menu.entry[current_mod];
 

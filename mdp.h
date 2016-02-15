@@ -30,8 +30,9 @@ extern struct menu menu;
 void setcolor(int);
 void drawhline(int, int, int);
 void drawvline(int, int, int);
+void fill(SDL_Surface *);
 int init_video(void);
-int writemsg(SDL_Surface *surf, struct font_header *, int, int, char *, int, int);
+int writemsg(SDL_Surface *, struct font_header *, int, int, char *, int, int);
 int parse_mdi(void);
 
 #endif

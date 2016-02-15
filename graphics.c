@@ -13,7 +13,7 @@ static int palette[] = {
     0x0d, 0x0d, 0x0d,	/*  8 */	0x0b, 0x10, 0x15,	/*  9 */
     0x0b, 0x15, 0x1a,	/* 10 */	0x05, 0x08, 0x10,	/* 11 */
     0x0b, 0x10, 0x15,	/* 12 */	0x10, 0x14, 0x32,	/* 13 */
-    0x15, 0x1e, 0x27,	/* 14 */	0xff, 0xff, 0xff	/* 15 */
+    0x20, 0x34, 0x34,	/* 14 */	0xff, 0xff, 0xff	/* 15 */
 };
 
 static SDL_Color color[16];
@@ -59,9 +59,20 @@ static inline void put_pixel(SDL_Surface *surf, int x, int y, int c)
 	}
 }
 
-static void drawpixel(SDL_Surface *surf, int x, int y)
+static inline void drawpixel(SDL_Surface *surf, int x, int y)
 {
 	put_pixel(surf, x, y, __color);
+}
+
+void fill(SDL_Surface *surf)
+{
+	int i, j;
+
+	for (i = 0; i < surf->h; i++) {
+		for (j = 0; j < surf->w; j++) {
+			drawpixel(surf, i, j);
+		}
+	}
 }
 
 void drawhline(int x, int y, int w)
