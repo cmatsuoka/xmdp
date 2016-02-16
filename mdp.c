@@ -79,7 +79,7 @@ void draw_lines(int i, int a, int b, int c)
 	i = i * 16 + 1;
 	for (; a < b; a++)
 		drawhline(i, a, 13);
-	SDL_UpdateRect(screen, i, y, 13, a - y + 1);
+	//SDL_UpdateRect(screen, i, y, 13, a - y + 1);
 }
 
 void draw_bars()
@@ -92,8 +92,9 @@ void draw_bars()
 		y2 = ci->y2;
 		y3 = ci->y3;
 
-		if ((v = ci->vol))
+		if ((v = ci->vol)) {
 			ci->vol--;
+		}
 
 		if (ci->timer && !--ci->timer) {
 			draw_lines(i, y2, y3, 0);
@@ -101,8 +102,9 @@ void draw_bars()
 			continue;
 		}
 
-		if (ci->note == 0)
+		if (ci->note == 0) {
 			continue;
+		}
 
 		/* find pitch */
 		p = 538 - ci->note * 4 - ci->bend / 25;
@@ -165,9 +167,9 @@ void draw_progress(int pos)
 	SDL_UpdateRect(screen, 11, 58, 127, 7);
 }
 
-void shadowmsg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b)
+void shadowmsg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int sc, int b)
 {
-	writemsg(surf, f, x + 2, y + 2, s, 0, b);
+	writemsg(surf, f, x + 2, y + 2, s, sc, b);
 	writemsg(surf, f, x, y, s, c, b);
 }
 
@@ -186,10 +188,10 @@ void prepare_menu_screen()
 
 	e = &menu.entry[current_mod];
 
-	shadowmsg(menu_screen, &font1, 2, 200, e->title, 15, -1);
+	shadowmsg(menu_screen, &font1, 2, 200, e->title, 15, 8, -1);
 	rightmsg(menu_screen, &font2, 510, 200, e->year, 15, -1);
 	for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
-		shadowmsg(menu_screen, &font2, 2, 222 + 18 * i, e->comment[i], 12, -1);
+		shadowmsg(menu_screen, &font2, 2, 222 + 18 * i, e->comment[i], 12, 8, -1);
 	}
 
 	SDL_BlitSurface(menu_screen, 0, screen, &r);
@@ -342,7 +344,7 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	int i;
 
 	if (mode_changed) {
-		shadowmsg(screen, &font1, 10, 26, mi->mod->name, 15, -1);
+		shadowmsg(screen, &font1, 10, 26, mi->mod->name, 15, 0, -1);
 	}
 
 	update_counter(fi->pos, pos, 20);
