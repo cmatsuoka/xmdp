@@ -9,6 +9,9 @@ ifeq (Darwin,$(shell uname -s))
 	LDFLAGS := -framework Cocoa -lSDLmain
 endif
 
+.c.o:
+	$(CC) -c -o $*.o $(CFLAGS) $<
+
 all: xmdp
 
 xmdp: mdp.o graphics.o parse.o font1.o font2.o
@@ -16,3 +19,5 @@ xmdp: mdp.o graphics.o parse.o font1.o font2.o
 
 clean:
 	rm -f core *.o *~
+
+graphics.o parse.o mdp.o: mdp.h
