@@ -36,6 +36,8 @@
 #define MODE_MENU   0		/* Song menu screen */
 #define MODE_PLAYER 1		/* Player screen */
 
+#define MENU_HEIGHT 480
+
 struct channel_info {
     int timer;
     int vol;
@@ -50,6 +52,9 @@ struct channel_info {
 
 #define shadowmsg(surf,f,x,y,s,c,sc,b)					\
     msg(surf,f,x,y,s,c,b,sc)
+
+#define centermsg(surf,f,x,y,s,c,b)					\
+    shadowmsg(surf, f, (x) - writemsg(surf,f,0,0,s,-1,0) / 2, y, s, c, 0, b)
 
 #define rightmsg(surf,f,x,y,s,c,b)					\
     writemsg(surf, f, (x) - writemsg(surf,f,0,0,s,-1,0), y, s, c, b)
@@ -175,28 +180,40 @@ void draw_progress(int pos)
 
 void prepare_menu_screen()
 {
-	SDL_Rect r = { 64, 0, 512, 480 };
+	SDL_Rect r = { 64, 0, 512, MENU_HEIGHT };
 	struct menu_entry *e;
-	int i;
+	int i, j, ypos;
 
 	setcolor(9);
-	for (i = 0; i < 480; i++) {
-		drawhline(0, i, 640);
+	for (i = 0; i < MENU_HEIGHT; i++) {
+		drawhline(0, i, 64);
+		drawhline(576, i, 64);
 	}
 
 	fill(menu_screen);
 
-	e = &menu.entry[current_mod];
+	ypos = 18;
 
-	shadowmsg(menu_screen, &font1, 2, 200, e->title, 15, 0, -1);
-	rightmsg(menu_screen, &font2, 510, 200, e->year, 15, -1);
-	for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
-		shadowmsg(menu_screen, &font2, 2, 222 + 18 * i, e->comment[i], 12, 0, -1);
+	/* write titles */
+	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
+		centermsg(menu_screen, &font1, 256, ypos, menu.titles[i], 12, -1);
+		ypos += 24;
+	}
+
+	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
+		ypos += 40;
+		e = &menu.entry[j];
+
+		shadowmsg(menu_screen, &font1, 2, ypos, e->title, 15, 0, -1);
+		rightmsg(menu_screen, &font2, 510, ypos, e->year, 15, -1);
+		ypos += 4;
+		for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
+			ypos += 18;
+			shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], 12, 0, -1);
+		}
 	}
 
 	SDL_BlitSurface(menu_screen, 0, screen, &r);
-
-
 	SDL_UpdateRect(screen, 0, 0, 640, 480);
 }
 

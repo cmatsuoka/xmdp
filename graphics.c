@@ -30,6 +30,10 @@ static inline void put_pixel(SDL_Surface *surf, int x, int y, int c)
 	Uint32 pixel;
 	Uint8 *bits, bpp;
 
+	if (x < 0 || x >= surf->w || y < 0 || y > surf->h) {
+		return;
+	}
+
 	pixel = mapped_color[c];
 
 	bpp = surf->format->BytesPerPixel;

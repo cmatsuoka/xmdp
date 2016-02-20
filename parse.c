@@ -51,10 +51,6 @@ int parse_mdi()
 		menu.entry[i].title = copy_trim(line);
 		fgets(line, LINE_SIZE, f);
 		menu.entry[i].year = copy_trim(line);
-		fgets(line, LINE_SIZE, f);
-		menu.entry[i].channels = copy_trim(line);
-		fgets(line, LINE_SIZE, f);
-		menu.entry[i].time = copy_trim(line);
 
 		for (j = 0; j < MAX_COMMENT; j++) {
 			fgets(line, LINE_SIZE, f);
