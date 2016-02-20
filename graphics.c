@@ -93,10 +93,50 @@ void drawvline(int x, int y, int h)
 	}
 }
 
-int writemsg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b)
+int writechar(SDL_Surface *surf, struct font_header *f, int x, int y, char s, int c, int b)
 {
-	int x1 = 0, y1 = 0;
 	unsigned int p, *ptr;
+	int x1 = 0, y1;
+
+	ptr = &f->map[f->index[(int)s]];
+
+	/* each character */
+	while (1) {
+		p = *ptr;
+		if (p & (1 << 31))	/* end of character */
+			break;
+
+		/* each column */
+		for (y1 = 0; y1 < f->h; y1++) {
+			if (c >= 0) {
+				if (p & 1) {
+					setcolor(c);
+					drawpixel(surf, x + x1, y - y1);
+				} else if (b != -1) {
+					setcolor(b);
+					drawpixel(surf, x + x1, y - y1);
+				}
+			}
+			p >>= 1;
+		}
+
+		/* fill rest of the column */
+		if (b != -1 && c != -1) {
+			setcolor(b);
+			for (; y1 < f->h; y1++)
+				drawpixel(surf, x + x1, y - y1);
+		}
+
+		x1++;
+		ptr++;
+	}
+
+	return x1;
+}
+
+int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b, int sc)
+{
+	int x1 = 0, y1;
 	int color = c;
 
 	if (s == NULL || *s == 0)
@@ -113,38 +153,12 @@ int writemsg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, in
 			continue;
 		}
 
-		ptr = &f->map[f->index[(int)*s]];
-
-		/* each character */
-		while (1) {
-			p = *ptr;
-			if (p & (1 << 31))	/* end of character */
-				break;
-
-			/* each column */
-			for (y1 = 0; y1 < f->h; y1++) {
-				if (c >= 0) {
-					if (p & 1) {
-						setcolor(c);
-						drawpixel(surf, x + x1, y - y1);
-					} else if (b != -1) {
-						setcolor(b);
-						drawpixel(surf, x + x1, y - y1);
-					}
-				}
-				p >>= 1;
-			}
-
-			/* fill rest of the column */
-			if (b != -1 && c != -1) {
-				setcolor(b);
-				for (; y1 < f->h; y1++)
-					drawpixel(surf, x + x1, y - y1);
-			}
-
-			x1++;
-			ptr++;
+		/* draw shadow */
+		if (sc >= 0) {
+			writechar(surf, f, x + x1 + 2, y + 2, *s, sc, b);
 		}
+
+		x1 += writechar(surf, f, x + x1, y, *s, c, b);
 
 		/* inter-character spacing */
 		if (b != -1 && c != -1) {
