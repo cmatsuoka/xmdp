@@ -197,8 +197,10 @@ void prepare_menu_screen()
 	/* write titles */
 	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
 		centermsg(menu_screen, &font1, 256, ypos, menu.titles[i], 12, -1);
-		ypos += 24;
+		ypos += 20;
 	}
+
+	ypos += 5;
 
 	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
 		ypos += 40;
