@@ -54,10 +54,10 @@ struct channel_info {
     msg(surf,f,x,y,s,c,b,sc)
 
 #define centermsg(surf,f,x,y,s,c,b)					\
-    shadowmsg(surf, f, (x) - writemsg(surf,f,0,0,s,-1,0) / 2, y, s, c, 0, b)
+    shadowmsg(surf, f, (x) - msglen(f,s) / 2, y, s, c, 0, b)
 
 #define rightmsg(surf,f,x,y,s,c,b)					\
-    writemsg(surf, f, (x) - writemsg(surf,f,0,0,s,-1,0), y, s, c, b)
+    writemsg(surf, f, (x) - msglen(f,s), y, s, c, b)
 
 #define update_counter(a,b,y) {						\
     if (mode_changed || (a) != (b)) {					\

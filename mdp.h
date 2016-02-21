@@ -32,6 +32,7 @@ void drawvline(int, int, int);
 void fill(SDL_Surface *);
 int init_video(void);
 int msg(SDL_Surface *, struct font_header *, int, int, char *, int, int, int);
+int msglen(struct font_header *, char *);
 int parse_mdi(void);
 
 #endif

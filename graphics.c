@@ -97,6 +97,24 @@ void drawvline(int x, int y, int h)
 	}
 }
 
+int msglen(struct font_header *f, char *s)
+{
+	unsigned int *p;
+	int len;
+
+	for (len = 0; *s; s++) {
+		if (*s == '@') {
+			continue;
+		}
+		for (p = &f->map[f->index[(int)*s]]; *p != 0xffffffff; p++) {
+			len++;
+		}
+		len++;
+	}
+
+	return len;
+}
+
 int writechar(SDL_Surface *surf, struct font_header *f, int x, int y, char s, int c, int b)
 {
 	unsigned int p, *ptr;
