@@ -82,10 +82,15 @@ static int volume;
 static int mode = MODE_MENU;
 static int mode_changed = 1;
 static int current_mod;
-static int old_blit = -1;
-static int blit_y;
+static int ofs_y, blit_y;
 
 static struct xmp_module_info mi;
+
+
+float interpolate(float in)
+{
+	return in >= 0.0f ? in * in * in : -in * in * in;
+}
 
 
 void draw_lines(int i, int a, int b, int c)
@@ -208,7 +213,8 @@ void stop_player()
 
 void update_menu_screen()
 {
-	SDL_Rect r0 = { 0, MENU_OFFSET - blit_y, 512, MENU_HEIGHT };
+	int offset = ofs_y ? ofs_y * interpolate(1.0f * blit_y / ofs_y) : 0;
+	SDL_Rect r0 = { 0, MENU_OFFSET - offset, 512, MENU_HEIGHT };
 	SDL_Rect r = { 64, 0, 512, MENU_HEIGHT };
 
 	SDL_BlitSurface(menu_screen, &r0, screen, &r);
@@ -375,10 +381,11 @@ static void process_menu_events(int key)
 	switch (key) {
 	case SDLK_UP:
 		if (current_mod > 0) {
+			current_mod--;
 			ystart = menu.entry[current_mod].ystart;
 			yend = menu.entry[current_mod].yend;
-			current_mod--;
-			blit_y -= yend - ystart + 14 + 18;
+			ofs_y = -(yend - ystart + 14);
+			blit_y = ofs_y;
 		}
 		prepare_menu_screen();
 		update_menu_screen();
@@ -388,7 +395,8 @@ static void process_menu_events(int key)
 			ystart = menu.entry[current_mod].ystart;
 			yend = menu.entry[current_mod].yend;
 			current_mod++;
-			blit_y += yend - ystart + 14;
+			ofs_y = yend - ystart + 14;
+			blit_y = ofs_y;
 		}
 		prepare_menu_screen();
 		update_menu_screen();
@@ -477,7 +485,7 @@ static void process_events()
 }
 
 
-#define STEP 8
+#define STEP 2
 
 static void draw_menu_screen()
 {
@@ -608,7 +616,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	blit_y = 0;
+	ofs_y = 0;
 	current_mod = 0;
 	collect_ystart();
 
