@@ -68,17 +68,6 @@ static inline void drawpixel(SDL_Surface *surf, int x, int y)
 	put_pixel(surf, x, y, __color);
 }
 
-void fill(SDL_Surface *surf)
-{
-	int i, j;
-
-	for (i = 0; i < surf->h; i++) {
-		for (j = 0; j < surf->w; j++) {
-			drawpixel(surf, i, j);
-		}
-	}
-}
-
 void drawhline(SDL_Surface *surf, int x, int y, int w)
 {
 	int i;

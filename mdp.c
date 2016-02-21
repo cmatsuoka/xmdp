@@ -37,6 +37,7 @@
 #define MODE_PLAYER 1		/* Player screen */
 
 #define MENU_HEIGHT 480
+#define MENU_OFFSET 200
 #define MENU_START 200
 
 struct channel_info {
@@ -81,6 +82,8 @@ static int volume;
 static int mode = MODE_MENU;
 static int mode_changed = 1;
 static int current_mod;
+static int old_blit = -1;
+static int blit_y;
 
 static struct xmp_module_info mi;
 
@@ -205,10 +208,11 @@ void stop_player()
 
 void update_menu_screen()
 {
+	SDL_Rect r0 = { 0, MENU_OFFSET - blit_y, 512, MENU_HEIGHT };
 	SDL_Rect r = { 64, 0, 512, MENU_HEIGHT };
 
-	SDL_BlitSurface(menu_screen, 0, screen, &r);
-	SDL_UpdateRect(screen, 0, 0, 640, 480);
+	SDL_BlitSurface(menu_screen, &r0, screen, &r);
+	SDL_UpdateRect(screen, 64, 0, 512, 480);
 }
 
 void collect_ystart()
@@ -252,15 +256,19 @@ void prepare_menu_screen()
 		drawhline(screen, 576, i, 64);
 	}
 
-	fill(menu_screen);
+	/* fill background */
+	for (i = 0; i < 960; i++) {
+		drawhline(menu_screen, 0, i, 512);
+	}
 
 	ystart = menu.entry[current_mod].ystart;
 	yend = menu.entry[current_mod].yend;
-	ypos = MENU_START - ystart;
+	ypos = MENU_START - ystart + MENU_OFFSET;
 
+	/* draw selection box */
 	setcolor(14);
 	for (i = 0; i < yend - ystart; i++) {
-		int y = MENU_START + i - 4;
+		int y = MENU_START + i - 4 + MENU_OFFSET;
 		drawhline(menu_screen, 0, y, 512);
 	}
 
@@ -287,6 +295,8 @@ void prepare_menu_screen()
 	}
 
 	update_menu_screen();
+	SDL_UpdateRect(screen, 0, 0, 64, 480);
+	SDL_UpdateRect(screen, 576, 0, 64, 480);
 }
 
 void prepare_player_screen()
@@ -360,18 +370,25 @@ static void switch_to_menu()
 static void process_menu_events(int key)
 {
 	char *filename;
+	int ystart, yend;
 
 	switch (key) {
 	case SDLK_UP:
 		if (current_mod > 0) {
+			ystart = menu.entry[current_mod].ystart;
+			yend = menu.entry[current_mod].yend;
 			current_mod--;
+			blit_y -= yend - ystart + 14 + 18;
 		}
 		prepare_menu_screen();
 		update_menu_screen();
 		break;
 	case SDLK_DOWN:
 		if (current_mod < menu.num_entries - 1) {
+			ystart = menu.entry[current_mod].ystart;
+			yend = menu.entry[current_mod].yend;
 			current_mod++;
+			blit_y += yend - ystart + 14;
 		}
 		prepare_menu_screen();
 		update_menu_screen();
@@ -460,8 +477,19 @@ static void process_events()
 }
 
 
+#define STEP 8
+
 static void draw_menu_screen()
 {
+	if (blit_y > STEP) {
+		blit_y -= STEP;
+		update_menu_screen();
+	} else if (blit_y < -STEP) {
+		blit_y += STEP;
+		update_menu_screen();
+	} else {
+		blit_y = 0;
+	}
 }
 
 static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info *fi)
@@ -580,6 +608,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	blit_y = 0;
 	current_mod = 0;
 	collect_ystart();
 
@@ -604,11 +633,12 @@ int main(int argc, char **argv)
 
 		if (mode == MODE_MENU) {
 			draw_menu_screen();
+			usleep(10000);
 		} else {
 			draw_player_screen(&mi, &fi);
+			usleep(100000);
 		}
 		mode_changed = 0;
-		usleep(100000);
 	}
 
 	xmp_end_player(ctx);
