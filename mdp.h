@@ -20,6 +20,7 @@ struct menu {
 	char *titles[MAX_TITLES];
 	struct menu_entry entry[MAX_ENTRIES];
 	char *lastline;
+	int num_entries;
 };
 
 extern SDL_Surface *screen;

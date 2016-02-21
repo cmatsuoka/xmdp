@@ -37,6 +37,7 @@
 #define MODE_PLAYER 1		/* Player screen */
 
 #define MENU_HEIGHT 480
+#define MENU_START 200
 
 struct channel_info {
     int timer;
@@ -178,11 +179,48 @@ void draw_progress(int pos)
 	SDL_UpdateRect(screen, 11, 58, 127, 7);
 }
 
-void prepare_menu_screen()
+void update_menu_screen()
 {
 	SDL_Rect r = { 64, 0, 512, MENU_HEIGHT };
+
+	SDL_BlitSurface(menu_screen, 0, screen, &r);
+	SDL_UpdateRect(screen, 0, 0, 640, 480);
+}
+
+void collect_ystart()
+{
 	struct menu_entry *e;
 	int i, j, ypos;
+
+	ypos = 0;
+
+	/* write titles */
+	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
+		ypos += 20;
+	}
+
+	ypos += 5;
+
+	/* write entries */
+	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
+		ypos += 40;
+		e = &menu.entry[j];
+
+		e->ystart = ypos - 18;
+
+		ypos += 4;
+		for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
+			ypos += 18;
+		}
+
+		e->yend = ypos + 8;
+	}
+}
+
+void prepare_menu_screen()
+{
+	struct menu_entry *e;
+	int i, j, ypos, ystart;
 
 	setcolor(9);
 	for (i = 0; i < MENU_HEIGHT; i++) {
@@ -192,7 +230,8 @@ void prepare_menu_screen()
 
 	fill(menu_screen);
 
-	ypos = 250;
+	ystart = menu.entry[current_mod].ystart;
+	ypos = MENU_START - ystart;
 
 	/* write titles */
 	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
@@ -207,8 +246,6 @@ void prepare_menu_screen()
 		ypos += 40;
 		e = &menu.entry[j];
 
-		e->ystart = ypos - 18;
-
 		shadowmsg(menu_screen, &font1, 2, ypos, e->title, 15, 0, -1);
 		rightmsg(menu_screen, &font2, 510, ypos, e->year, 15, -1);
 		ypos += 4;
@@ -216,12 +253,9 @@ void prepare_menu_screen()
 			ypos += 18;
 			shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], 12, 0, -1);
 		}
-
-		e->yend = ypos + 8;
 	}
 
-	SDL_BlitSurface(menu_screen, 0, screen, &r);
-	SDL_UpdateRect(screen, 0, 0, 640, 480);
+	update_menu_screen();
 }
 
 void prepare_player_screen()
@@ -277,8 +311,18 @@ static void process_menu_events(int key)
 {
 	switch (key) {
 	case SDLK_UP:
+		if (current_mod > 0) {
+			current_mod--;
+		}
+		prepare_menu_screen();
+		update_menu_screen();
 		break;
 	case SDLK_DOWN:
+		if (current_mod < menu.num_entries - 1) {
+			current_mod++;
+		}
+		prepare_menu_screen();
+		update_menu_screen();
 		break;
 	}
 }
@@ -326,8 +370,9 @@ static void process_events()
 	while (SDL_PollEvent(&event) > 0) {
 		int key;
 
-		if (event.type != SDL_KEYDOWN)
+		if (event.type != SDL_KEYDOWN) {
 			continue;
+		}
 
 		key = (int)event.key.keysym.sym;
 
@@ -481,6 +526,9 @@ int main(int argc, char **argv)
 		fprintf(stderr, "%s: can't load %s\n", argv[0], argv[optind]);
 		goto err1;
 	}
+
+	current_mod = 0;
+	collect_ystart();
 
 	init_video();
 	prepare_menu_screen();

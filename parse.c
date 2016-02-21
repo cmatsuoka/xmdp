@@ -45,6 +45,8 @@ int parse_mdi()
 		if (line[1] == '#') {
 			break;
 		}
+
+		menu.num_entries++;
 		menu.entry[i].filename = copy_trim(line + 1);
 		printf("filename #%d: %s\n", i, menu.entry[i].filename);
 		fgets(line, LINE_SIZE, f);
