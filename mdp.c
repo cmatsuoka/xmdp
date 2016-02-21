@@ -76,7 +76,6 @@ static struct channel_info channel_info[40];
 
 static xmp_context ctx;
 static int paused;
-static int end_of_song;
 static int end_of_player = 0;
 static int volume;
 static int mode = MODE_MENU;
@@ -192,7 +191,6 @@ int start_player(char *filename)
 	xmp_start_player(ctx, SRATE, 0);
 	xmp_get_module_info(ctx, &mi);
 
-	end_of_song = 0;
 	volume = 64;
 	SDL_PauseAudio(paused = 0);
 
@@ -472,6 +470,10 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	char buf[80];
 	int i;
 
+	if (xmp_get_player(ctx, XMP_PLAYER_STATE) != XMP_STATE_PLAYING) {
+		return;
+	}
+
 	if (mode_changed) {
 		shadowmsg(screen, &font1, 10, 26, mi->mod->name, 15, 0, -1);
 	}
@@ -514,9 +516,7 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 
 static void fill_audio(void *udata, unsigned char *stream, int len)
 {
-	if (xmp_play_buffer(ctx, stream, len, 1) < 0) {
-		end_of_song = 1;
-	}
+	xmp_play_buffer(ctx, stream, len, 0);
 }
 
 int sound_init(int sampling_rate, int channels)
@@ -588,18 +588,19 @@ int main(int argc, char **argv)
 
 	ctx = xmp_create_context();
 
-	if (start_player(argv[optind]) < 0) {
-		fprintf(stderr, "%s: can't load %s\n", argv[0], argv[optind]);
-		goto err1;
+	if (argv[optind] != NULL) {
+		if (start_player(argv[optind]) < 0) {
+			fprintf(stderr, "%s: can't load %s\n", argv[0], argv[optind]);
+			goto err1;
+		}
 	}
 	
 	while (!end_of_player) {
 		process_events();
-		if (!end_of_song) {
-			SDL_LockAudio();
-			xmp_get_frame_info(ctx, &fi);
-			SDL_UnlockAudio();
-		}
+
+		SDL_LockAudio();
+		xmp_get_frame_info(ctx, &fi);
+		SDL_UnlockAudio();
 
 		if (mode == MODE_MENU) {
 			draw_menu_screen();
