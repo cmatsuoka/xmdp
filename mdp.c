@@ -192,7 +192,7 @@ void prepare_menu_screen()
 
 	fill(menu_screen);
 
-	ypos = 18;
+	ypos = 250;
 
 	/* write titles */
 	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
@@ -202,9 +202,12 @@ void prepare_menu_screen()
 
 	ypos += 5;
 
+	/* write entries */
 	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
 		ypos += 40;
 		e = &menu.entry[j];
+
+		e->ystart = ypos - 18;
 
 		shadowmsg(menu_screen, &font1, 2, ypos, e->title, 15, 0, -1);
 		rightmsg(menu_screen, &font2, 510, ypos, e->year, 15, -1);
@@ -213,6 +216,8 @@ void prepare_menu_screen()
 			ypos += 18;
 			shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], 12, 0, -1);
 		}
+
+		e->yend = ypos + 8;
 	}
 
 	SDL_BlitSurface(menu_screen, 0, screen, &r);

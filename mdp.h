@@ -13,6 +13,7 @@ struct menu_entry {
 	char *title;
 	char *year;
 	char *comment[MAX_COMMENT];
+	int ystart, yend;
 };
 
 struct menu {
