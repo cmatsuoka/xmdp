@@ -89,8 +89,9 @@ void draw_lines(int i, int a, int b, int c)
 
 	setcolor(c);
 	i = i * 16 + 1;
-	for (; a < b; a++)
-		drawhline(i, a, 13);
+	for (; a < b; a++) {
+		drawhline(screen, i, a, 13);
+	}
 	SDL_UpdateRect(screen, i, y, 13, a - y + 1);
 }
 
@@ -168,12 +169,12 @@ void draw_progress(int pos)
 	if (pos > oldpos) {
 		setcolor(13);
 		for (i = oldpos + 1; i <= pos; i++)
-			drawvline(11 + i, 58, 7);
+			drawvline(screen, 11 + i, 58, 7);
 	}
 	if (pos < oldpos) {
 		setcolor(9);
 		for (i = pos + 1; i <= oldpos; i++)
-			drawvline(11 + i, 58, 7);
+			drawvline(screen, 11 + i, 58, 7);
 	}
 	oldpos = pos;
 	SDL_UpdateRect(screen, 11, 58, 127, 7);
@@ -220,18 +221,25 @@ void collect_ystart()
 void prepare_menu_screen()
 {
 	struct menu_entry *e;
-	int i, j, ypos, ystart;
+	int i, j, ypos, ystart, yend;
 
 	setcolor(9);
 	for (i = 0; i < MENU_HEIGHT; i++) {
-		drawhline(0, i, 64);
-		drawhline(576, i, 64);
+		drawhline(screen, 0, i, 64);
+		drawhline(screen, 576, i, 64);
 	}
 
 	fill(menu_screen);
 
 	ystart = menu.entry[current_mod].ystart;
+	yend = menu.entry[current_mod].yend;
 	ypos = MENU_START - ystart;
+
+	setcolor(14);
+	for (i = 0; i < yend - ystart; i++) {
+		int y = MENU_START + i - 4;
+		drawhline(menu_screen, 0, y, 512);
+	}
 
 	/* write titles */
 	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
@@ -265,31 +273,32 @@ void prepare_player_screen()
 	memset(screen->pixels, 0, screen->w * screen->h * screen->format->BytesPerPixel);
 
 	setcolor(10);
-	drawhline(0, 0, 640);
-	drawhline(0, 1, 640);
+	drawhline(screen, 0, 0, 640);
+	drawhline(screen, 0, 1, 640);
 	setcolor(9);
-	for (i = 2; i < 72; i++)
-		drawhline(0, i, 640);
+	for (i = 2; i < 72; i++) {
+		drawhline(screen, 0, i, 640);
+	}
 	setcolor(11);
-	drawhline(0, 72, 640);
-	drawhline(0, 73, 640);
+	drawhline(screen, 0, 72, 640);
+	drawhline(screen, 0, 73, 640);
 	setcolor(8);
 	for (i = 0; i < 39; i++) {
 		x = i * 16 + 15;
-		drawvline(x, 85, 386);
+		drawvline(screen, x, 85, 386);
 		for (j = 0; j < 17; j++) {
 			y = 470 - j * 24;
-			drawhline(x - 1, y, 3);
+			drawhline(screen, x - 1, y, 3);
 			if (!(j % 2))
-				drawhline(x - 1, y - 1, 3);
+				drawhline(screen, x - 1, y - 1, 3);
 		}
 	}
 	setcolor(10);
-	drawhline(10, 65, 129);
-	drawvline(138, 57, 9);
+	drawhline(screen, 10, 65, 129);
+	drawvline(screen, 138, 57, 9);
 	setcolor(11);
-	drawhline(10, 57, 129);
-	drawvline(10, 57, 9);
+	drawhline(screen, 10, 57, 129);
+	drawvline(screen, 10, 57, 9);
 
 	rightmsg(screen, &font2, 500, 36, "Spacebar to pause", 14, -1);
 	rightmsg(screen, &font2, 500, 52, "+/- to change volume", 14, -1);

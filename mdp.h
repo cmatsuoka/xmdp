@@ -28,8 +28,8 @@ extern SDL_Surface *menu_screen;
 extern struct menu menu;
 
 void setcolor(int);
-void drawhline(int, int, int);
-void drawvline(int, int, int);
+void drawhline(SDL_Surface *, int, int, int);
+void drawvline(SDL_Surface *, int, int, int);
 void fill(SDL_Surface *);
 int init_video(void);
 int msg(SDL_Surface *, struct font_header *, int, int, char *, int, int, int);

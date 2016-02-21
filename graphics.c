@@ -79,21 +79,21 @@ void fill(SDL_Surface *surf)
 	}
 }
 
-void drawhline(int x, int y, int w)
+void drawhline(SDL_Surface *surf, int x, int y, int w)
 {
 	int i;
 
 	for (i = 0; i < w; i++) {
-		drawpixel(screen, x + i, y);
+		drawpixel(surf, x + i, y);
 	}
 }
 
-void drawvline(int x, int y, int h)
+void drawvline(SDL_Surface *surf, int x, int y, int h)
 {
 	int i;
 
 	for (i = 0; i < h; i++) {
-		drawpixel(screen, x, y + i);
+		drawpixel(surf, x, y + i);
 	}
 }
 
