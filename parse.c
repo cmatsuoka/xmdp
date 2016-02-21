@@ -31,19 +31,20 @@ int parse_mdi()
 		return -1;
 	}
 
-	// read title
+	/* read title */
 	for (i = 0; i < MAX_COMMENT; i++) {
 		fgets(line, LINE_SIZE, f);
 		if (line[0] == '#') {
 			break;
 		}
 		menu.titles[i] = copy_trim(line);
-		printf("TITLE: %s\n", menu.titles[i]);
+		/* printf("TITLE: %s\n", menu.titles[i]); */
 	}
 	if (line[0] != '#') {
 		return -1;
 	}
 
+	/* read entries */
 	for (i = 0; i < MAX_ENTRIES; i++) {
 		if (line[1] == '#') {
 			break;
@@ -51,7 +52,7 @@ int parse_mdi()
 
 		menu.num_entries++;
 		menu.entry[i].filename = copy_trim(line + 1);
-		printf("filename #%d: %s\n", i, menu.entry[i].filename);
+		/* printf("filename #%d: %s\n", i, menu.entry[i].filename); */
 		fgets(line, LINE_SIZE, f);
 		menu.entry[i].title = copy_trim(line);
 		fgets(line, LINE_SIZE, f);
@@ -74,7 +75,6 @@ int parse_mdi()
 
 	fgets(line, LINE_SIZE, f);
 	menu.lastline = copy_trim(line);
-
 
 	return 0;
 }
