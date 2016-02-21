@@ -77,10 +77,13 @@ static struct channel_info channel_info[40];
 static xmp_context ctx;
 static int paused;
 static int end_of_song;
+static int end_of_player = 0;
 static int volume;
 static int mode = MODE_MENU;
 static int mode_changed = 1;
 static int current_mod;
+
+static struct xmp_module_info mi;
 
 
 void draw_lines(int i, int a, int b, int c)
@@ -178,6 +181,28 @@ void draw_progress(int pos)
 	}
 	oldpos = pos;
 	SDL_UpdateRect(screen, 11, 58, 127, 7);
+}
+
+int start_player(char *filename)
+{
+	if (xmp_load_module(ctx, filename) < 0) {
+		return -1;
+	}
+
+	xmp_start_player(ctx, SRATE, 0);
+	xmp_get_module_info(ctx, &mi);
+
+	end_of_song = 0;
+	volume = 64;
+	SDL_PauseAudio(paused = 0);
+
+	return 0;
+}
+
+void stop_player()
+{
+	xmp_end_player(ctx);
+	xmp_release_module(ctx);
 }
 
 void update_menu_screen()
@@ -316,8 +341,28 @@ void prepare_player_screen()
 	SDL_UpdateRect(screen, 0, 0, 640, 480);
 }
 
+static void switch_to_player()
+{
+	if (mode == MODE_MENU) {
+		mode = MODE_PLAYER;
+		prepare_player_screen();
+		mode_changed = 1;
+	}
+}
+
+static void switch_to_menu()
+{
+	if (mode == MODE_PLAYER) {
+		mode = MODE_MENU;
+		prepare_menu_screen();
+		mode_changed = 1;
+	}
+}
+
 static void process_menu_events(int key)
 {
+	char *filename;
+
 	switch (key) {
 	case SDLK_UP:
 		if (current_mod > 0) {
@@ -332,6 +377,14 @@ static void process_menu_events(int key)
 		}
 		prepare_menu_screen();
 		update_menu_screen();
+		break;
+	case SDLK_RETURN:
+		stop_player();
+		filename = menu.entry[current_mod].filename;
+		if (start_player(filename) < 0) {
+			perror(filename);
+		}
+		switch_to_player();
 		break;
 	}
 }
@@ -389,16 +442,14 @@ static void process_events()
 		case SDLK_F10:
 			xmp_stop_module(ctx);
 			SDL_PauseAudio(paused = 0);
+			end_of_player = 1;
 			break;
 		case SDLK_ESCAPE:
 			if (mode == MODE_MENU) {
-				mode = MODE_PLAYER;
-				prepare_player_screen();
+				switch_to_player();
 			} else {
-				mode = MODE_MENU;
-				prepare_menu_screen();
+				switch_to_menu();
 			}
-			mode_changed = 1;
 			break;
 		default:
 			if (mode == MODE_MENU) {
@@ -463,8 +514,9 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 
 static void fill_audio(void *udata, unsigned char *stream, int len)
 {
-	if (xmp_play_buffer(ctx, stream, len, 1) < 0)
+	if (xmp_play_buffer(ctx, stream, len, 1) < 0) {
 		end_of_song = 1;
+	}
 }
 
 int sound_init(int sampling_rate, int channels)
@@ -504,7 +556,6 @@ void usage()
 int main(int argc, char **argv)
 {
 	int o;
-	struct xmp_module_info mi;
 	struct xmp_frame_info fi;
 
 	while ((o = getopt(argc, argv, "v")) != -1) {
@@ -529,31 +580,26 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	ctx = xmp_create_context();
-
-	if (xmp_load_module(ctx, argv[optind]) < 0) {
-		fprintf(stderr, "%s: can't load %s\n", argv[0], argv[optind]);
-		goto err1;
-	}
-
 	current_mod = 0;
 	collect_ystart();
 
 	init_video();
 	prepare_menu_screen();
 
-	xmp_start_player(ctx, SRATE, 0);
-	xmp_get_module_info(ctx, &mi);
+	ctx = xmp_create_context();
 
-	end_of_song = 0;
-	volume = 64;
-	SDL_PauseAudio(paused = 0);
-
-	while (!end_of_song) {
+	if (start_player(argv[optind]) < 0) {
+		fprintf(stderr, "%s: can't load %s\n", argv[0], argv[optind]);
+		goto err1;
+	}
+	
+	while (!end_of_player) {
 		process_events();
-		SDL_LockAudio();
-		xmp_get_frame_info(ctx, &fi);
-		SDL_UnlockAudio();
+		if (!end_of_song) {
+			SDL_LockAudio();
+			xmp_get_frame_info(ctx, &fi);
+			SDL_UnlockAudio();
+		}
 
 		if (mode == MODE_MENU) {
 			draw_menu_screen();

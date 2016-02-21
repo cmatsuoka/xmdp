@@ -12,6 +12,9 @@ static char *copy_trim(char *s)
 	if (len > 0 && s[len - 1] == '\n') {
 		s[len - 1] = 0;
 	}
+	if (len > 1 && s[len - 2] == '\r') {
+		s[len - 2] = 0;
+	}
 
 	return strdup(s);
 }
