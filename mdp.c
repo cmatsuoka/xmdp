@@ -379,6 +379,10 @@ static void process_menu_events(int key)
 	char *filename;
 	int ystart, yend;
 
+	if (blit_y > 0) {
+		return;
+	}
+
 	switch (key) {
 	case SDLK_UP:
 		if (current_mod > 0) {
