@@ -111,7 +111,7 @@ static int numspaces(char *s)
 
 void draw_lines(int i, int a, int b, int c)
 {
-	int y = a;
+	//int y = a;
 
 	setcolor(c);
 	i = i * 16 + 1;
@@ -423,8 +423,8 @@ static void process_menu_events(int key)
 			yend = menu.entry[current_mod].yend;
 			ofs_y = -(yend - ystart + 14);
 			blit_y = ofs_y;
+			prepare_menu_screen();
 		}
-		prepare_menu_screen();
 		break;
 	case SDLK_DOWN:
 		if (current_mod < menu.num_entries - 1) {
@@ -433,8 +433,8 @@ static void process_menu_events(int key)
 			current_mod++;
 			ofs_y = yend - ystart + 14;
 			blit_y = ofs_y;
+			prepare_menu_screen();
 		}
-		prepare_menu_screen();
 		break;
 	case SDLK_RETURN:
 		stop_player();
@@ -666,6 +666,7 @@ int main(int argc, char **argv)
 	}
 
 	init_video();
+	SDL_PollEvent(0);		/* otherwise screen starts blank */
 	prepare_menu_screen();
 	
 	while (!end_of_player) {
