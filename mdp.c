@@ -88,6 +88,7 @@ static int mode_changed = 1;
 static int current_mod;
 static int ofs_y, blit_y;
 static int menu_fade_in;
+static int menu_fade_out;
 
 static struct xmp_module_info mi;
 
@@ -339,9 +340,6 @@ void prepare_menu_screen()
 	}
 
 	update_menu_screen();
-	//SDL_UpdateRect(screen, 0, 0, 64, 480);
-	//SDL_UpdateRect(screen, 576, 0, 64, 480);
-	SDL_Flip(screen);
 }
 
 void prepare_player_screen()
@@ -390,9 +388,6 @@ void prepare_player_screen()
 	writemsg(screen, &font2, 580, 36, ":", 14, -1);
 	writemsg(screen, &font2, 580, 52, ":", 14, -1);
 	writemsg(screen, &font2, 580, 68, ":", 14, -1);
-
-	//SDL_UpdateRect(screen, 0, 0, 640, 480);
-	SDL_Flip(screen);
 }
 
 static void switch_to_player()
@@ -410,12 +405,12 @@ static void switch_to_menu()
 		mode = MODE_MENU;
 		prepare_menu_screen();
 		mode_changed = 1;
+		menu_fade_in = 255;
 	}
 }
 
 static void process_menu_events(int key)
 {
-	char *filename;
 	int ystart, yend;
 
 	if (blit_y > 0) {
@@ -444,12 +439,7 @@ static void process_menu_events(int key)
 		}
 		break;
 	case SDLK_RETURN:
-		stop_player();
-		filename = menu.entry[current_mod].filename;
-		if (start_player(filename) < 0) {
-			perror(filename);
-		}
-		switch_to_player();
+		menu_fade_out = 255;
 		break;
 	}
 }
@@ -511,9 +501,10 @@ static void process_events()
 			break;
 		case SDLK_ESCAPE:
 			if (mode == MODE_MENU) {
-				switch_to_player();
+				menu_fade_out = 255;
 			} else {
 				switch_to_menu();
+				menu_fade_in = 255;
 			}
 			break;
 		default:
@@ -526,8 +517,16 @@ static void process_events()
 	}
 }
 
+static void fade(SDL_Surface *surf, int val)
+{
+	draw_menu_borders();
+	update_menu_screen();
+	set_alpha(surf, val);
+	SDL_BlitSurface(black_screen, 0, screen, 0);
+}
+
 #define STEP 3
-#define FADE_STEP 16
+#define FADE_STEP 24
 
 static void draw_menu_screen()
 {
@@ -547,13 +546,27 @@ static void draw_menu_screen()
 
 	if (menu_fade_in > FADE_STEP) {
 		menu_fade_in -= FADE_STEP;
-		draw_menu_borders();
-		update_menu_screen();
-		set_alpha(black_screen, menu_fade_in);
-		SDL_BlitSurface(black_screen, 0, screen, 0);
+		fade(black_screen, menu_fade_in);
 		flip = 1;
-	} else {
+	} else if (menu_fade_in > 0) {
 		menu_fade_in = 0;
+	}
+
+	if (menu_fade_out > FADE_STEP) {
+		menu_fade_out -= FADE_STEP;
+		fade(black_screen, 255 - menu_fade_out);
+		flip = 1;
+	} else if (menu_fade_out > 0) {
+		char *filename;
+
+		menu_fade_out = 0;
+
+		stop_player();
+		filename = menu.entry[current_mod].filename;
+		if (start_player(filename) < 0) {
+			perror(filename);
+		}
+		switch_to_player();
 	}
 
 	if (flip) {
