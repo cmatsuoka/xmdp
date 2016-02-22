@@ -85,6 +85,7 @@ static int end_of_player = 0;
 static int volume;
 static int mode = MODE_MENU;
 static int mode_changed = 1;
+static int start_mod;
 static int current_mod;
 static int ofs_y, blit_y;
 static int menu_fade_in;
@@ -130,6 +131,7 @@ void draw_bars()
 	for (i = 0; i < 40; i++) {
 		struct channel_info *ci = &channel_info[i];
 
+		/* previous bar limits */
 		y2 = ci->y2;
 		y3 = ci->y3;
 
@@ -157,17 +159,21 @@ void draw_bars()
 		v++;
 
 		if (mode_changed) {
+			/* set old bar limits to lowest value */
 			y2 = y3 = p;	
 		}
 
+		/* current bar limits */
 		ci->y2 = y0 = p - v;
 		ci->y3 = y1 = p + v;
 		k = abs(((i + 10) % 12) - 6) + 1;
 
-		if ((y0 == y2) && (y1 == y3))
+		if (y0 == y2 && y1 == y3) {
+			/* nothing changed */
 			continue;
+		}
 
-		if ((y1 < y2) || (y3 < y0)) {
+		if (y1 < y2 || y3 < y0) {
 			draw_lines(i, y2, y3, 0);
 			draw_lines(i, y0, y1, k);
 			continue;
@@ -439,6 +445,7 @@ static void process_menu_events(int key)
 		}
 		break;
 	case SDLK_RETURN:
+		start_mod = 1;
 		menu_fade_out = 255;
 		break;
 	}
@@ -557,17 +564,22 @@ static void draw_menu_screen()
 		fade(black_screen, 255 - menu_fade_out);
 		flip = 1;
 	} else if (menu_fade_out > 0) {
-		char *filename;
-
 		menu_fade_out = 0;
 
-		stop_player();
-		filename = menu.entry[current_mod].filename;
-		if (start_player(filename) < 0) {
-			perror(filename);
+		if (start_mod) {
+			char *filename;
+
+			start_mod = 0;
+			stop_player();
+			filename = menu.entry[current_mod].filename;
+			if (start_player(filename) < 0) {
+				perror(filename);
+			}
 		}
+
 		switch_to_player();
         	shadowmsg(screen, &font1, 10, 26, mi.mod->name, 15, 0, -1);
+		flip = 1;
 	}
 
 	if (flip) {
@@ -694,6 +706,7 @@ int main(int argc, char **argv)
 
 	ofs_y = 0;
 	current_mod = 0;
+	start_mod = 0;
 	menu_fade_in = 255;
 	collect_ystart();
 
