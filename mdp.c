@@ -118,7 +118,7 @@ void draw_lines(int i, int a, int b, int c)
 	for (; a < b; a++) {
 		drawhline(screen, i, a, 13);
 	}
-	SDL_UpdateRect(screen, i, y, 13, a - y + 1);
+	//SDL_UpdateRect(screen, i, y, 13, a - y + 1);
 }
 
 void draw_bars()
@@ -203,7 +203,7 @@ void draw_progress(int pos)
 			drawvline(screen, 11 + i, 58, 7);
 	}
 	oldpos = pos;
-	SDL_UpdateRect(screen, 11, 58, 127, 7);
+	//SDL_UpdateRect(screen, 11, 58, 127, 7);
 }
 
 int start_player(char *filename)
@@ -238,7 +238,8 @@ void update_menu_screen()
 	SDL_Rect r = { 64, 0, 512, MENU_HEIGHT };
 
 	SDL_BlitSurface(menu_screen, &r0, screen, &r);
-	SDL_UpdateRect(screen, 64, 0, 512, 480);
+	//SDL_UpdateRect(screen, 64, 0, 512, 480);
+	SDL_Flip(screen);
 }
 
 void collect_ystart()
@@ -331,8 +332,9 @@ void prepare_menu_screen()
 	}
 
 	update_menu_screen();
-	SDL_UpdateRect(screen, 0, 0, 64, 480);
-	SDL_UpdateRect(screen, 576, 0, 64, 480);
+	//SDL_UpdateRect(screen, 0, 0, 64, 480);
+	//SDL_UpdateRect(screen, 576, 0, 64, 480);
+	SDL_Flip(screen);
 }
 
 void prepare_player_screen()
@@ -382,7 +384,8 @@ void prepare_player_screen()
 	writemsg(screen, &font2, 580, 52, ":", 14, -1);
 	writemsg(screen, &font2, 580, 68, ":", 14, -1);
 
-	SDL_UpdateRect(screen, 0, 0, 640, 480);
+	//SDL_UpdateRect(screen, 0, 0, 640, 480);
+	SDL_Flip(screen);
 }
 
 static void switch_to_player()
@@ -576,6 +579,7 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	}
 
 	draw_bars();
+	SDL_Flip(screen);
 }
 
 /*

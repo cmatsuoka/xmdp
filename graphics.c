@@ -191,7 +191,7 @@ int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, 
 	}
 
 	if (c != -1) {
-		SDL_UpdateRect(surf, x, y - f->h + 1, x1, f->h);
+		//SDL_UpdateRect(surf, x, y - f->h + 1, x1, f->h);
 	}
 
 	return x1;
@@ -201,20 +201,20 @@ int init_video()
 {
 	int i, mode;
     
-	if (SDL_Init (SDL_INIT_VIDEO /*| SDL_INIT_AUDIO*/) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_AUDIO*/) < 0) {
 		fprintf(stderr, "sdl: can't initialize: %s\n",
 			SDL_GetError());
 		return -1;
 	}
 
-	mode = SDL_SWSURFACE | SDL_ANYFORMAT;
+	mode = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ANYFORMAT;
 
 #if 0
 	if (opt.fullscreen)
 		mode |= SDL_FULLSCREEN;
 #endif
 
-	if ((screen = SDL_SetVideoMode (640, 480, 8, mode)) == NULL) {
+	if ((screen = SDL_SetVideoMode(640, 480, 8, mode)) == NULL) {
 		fprintf(stderr, "sdl: can't set video mode: %s\n",
 			SDL_GetError());
 		return -1;
