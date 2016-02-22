@@ -539,6 +539,8 @@ static void draw_menu_screen()
 {
 	int flip = 0;
 
+	mode_changed = 0;
+
 	if (blit_y > STEP) {
 		blit_y -= STEP;
 		update_menu_screen();
@@ -578,7 +580,7 @@ static void draw_menu_screen()
 		}
 
 		switch_to_player();
-        	shadowmsg(screen, &font1, 10, 26, mi.mod->name, 15, 0, -1);
+        	//shadowmsg(screen, &font1, 10, 26, mi.mod->name, 15, 0, -1);
 		flip = 1;
 	}
 
@@ -632,6 +634,8 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 
 	draw_bars();
 	SDL_Flip(screen);
+
+	mode_changed = 0;
 }
 
 /*
@@ -737,7 +741,6 @@ int main(int argc, char **argv)
 			draw_player_screen(&mi, &fi);
 			usleep(100000);
 		}
-		mode_changed = 0;
 	}
 
 	xmp_end_player(ctx);
