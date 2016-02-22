@@ -567,6 +567,7 @@ static void draw_menu_screen()
 			perror(filename);
 		}
 		switch_to_player();
+        	shadowmsg(screen, &font1, 10, 26, mi.mod->name, 15, 0, -1);
 	}
 
 	if (flip) {
