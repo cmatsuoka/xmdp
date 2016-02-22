@@ -208,6 +208,10 @@ int start_player(char *filename)
 
 void stop_player()
 {
+	if (xmp_get_player(ctx, XMP_PLAYER_STATE) != XMP_STATE_LOADED) {
+		return;
+	}
+
 	xmp_end_player(ctx);
 	xmp_release_module(ctx);
 }
