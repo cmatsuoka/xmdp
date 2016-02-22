@@ -422,7 +422,6 @@ static void process_menu_events(int key)
 			blit_y = ofs_y;
 		}
 		prepare_menu_screen();
-		update_menu_screen();
 		break;
 	case SDLK_DOWN:
 		if (current_mod < menu.num_entries - 1) {
@@ -433,7 +432,6 @@ static void process_menu_events(int key)
 			blit_y = ofs_y;
 		}
 		prepare_menu_screen();
-		update_menu_screen();
 		break;
 	case SDLK_RETURN:
 		stop_player();
@@ -519,7 +517,7 @@ static void process_events()
 }
 
 
-#define STEP 2
+#define STEP 3
 
 static void draw_menu_screen()
 {
@@ -654,9 +652,6 @@ int main(int argc, char **argv)
 	current_mod = 0;
 	collect_ystart();
 
-	init_video();
-	prepare_menu_screen();
-
 	ctx = xmp_create_context();
 
 	if (argv[optind] != NULL) {
@@ -665,6 +660,9 @@ int main(int argc, char **argv)
 			goto err1;
 		}
 	}
+
+	init_video();
+	prepare_menu_screen();
 	
 	while (!end_of_player) {
 		process_events();
