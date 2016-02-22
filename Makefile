@@ -3,10 +3,11 @@ CC = gcc
 CFLAGS = -O3 -Wall
 LD = gcc
 LDFLAGS =
-LIBS = -L../../lib -lxmp -lm
+LIBS = -lxmp -lm
 
 ifeq (Darwin,$(shell uname -s))
-	LDFLAGS := -framework Cocoa -lSDLmain
+	CFLAGS += -I/usr/local/include
+	LDFLAGS += -framework Cocoa -lSDLmain -L/usr/local/lib
 endif
 
 .c.o:
