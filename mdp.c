@@ -51,13 +51,16 @@ struct channel_info {
 
 
 #define writemsg(surf,f,x,y,s,c,b)					\
-    msg(surf,f,x,y,s,c,b,-1)
+    msg(surf,f,x,y,s,c,b,-1,-1,-1)
 
 #define shadowmsg(surf,f,x,y,s,c,sc,b)					\
-    msg(surf,f,x,y,s,c,b,sc)
+    msg(surf,f,x,y,s,c,b,sc,-1,-1)
 
 #define centermsg(surf,f,x,y,s,c,b)					\
     shadowmsg(surf, f, (x) - msglen(f,s) / 2, y, s, c, 0, b)
+
+#define justifymsg(surf,f,x,y,s,c,sc,b) 				\
+    msg(surf,f,x,y,s,c,b,sc,512-6-msglen(f,s),numspaces(s));		\
 
 #define rightmsg(surf,f,x,y,s,c,b)					\
     writemsg(surf, f, (x) - msglen(f,s), y, s, c, b)
@@ -88,11 +91,23 @@ static int ofs_y, blit_y;
 static struct xmp_module_info mi;
 
 
-float interpolate(float in)
+static float interpolate(float in)
 {
 	return in >= 0.0f ? in * in * in : -in * in * in;
 }
 
+static int numspaces(char *s)
+{
+	int n;
+
+	for (n = 0; *s; s++) {
+		if (*s == ' ') {
+			n++;
+		}
+	}
+
+	return n;
+}
 
 void draw_lines(int i, int a, int b, int c)
 {
@@ -296,12 +311,22 @@ void prepare_menu_screen()
 		ypos += 40;
 		e = &menu.entry[j];
 
+		/* title */
 		shadowmsg(menu_screen, &font1, 2, ypos, e->title, 15, 0, -1);
+
+		/* year */
 		rightmsg(menu_screen, &font2, 510, ypos, e->year, 15, -1);
+
 		ypos += 4;
+
+		/* comment lines */
 		for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
 			ypos += 18;
-			shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], 12, 0, -1);
+			if (e->comment[i][0] == '$') {
+				justifymsg(menu_screen, &font2, 2, ypos, e->comment[i] + 1, 12, 0, -1);
+			} else {
+				shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], 12, 0, -1);
+			}
 		}
 	}
 

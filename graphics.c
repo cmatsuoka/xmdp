@@ -145,10 +145,12 @@ int writechar(SDL_Surface *surf, struct font_header *f, int x, int y, char s, in
 	return x1;
 }
 
-int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b, int sc)
+int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b, int sc, int len, int numsp)
 {
 	int x1 = 0, y1;
 	int color = c;
+	int sp = len / numsp;		/* justification spacing */
+	int extra = len % numsp;	/* extra spacing */
 
 	if (s == NULL || *s == 0)
 		return 0;
@@ -162,7 +164,16 @@ int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, 
 					c = color;
 			}
 			continue;
+		} else if (*s == ' ') {
+			if (sp > 0) {	/* justification */
+				x1 += sp;
+			}
+			if (extra > 0) {
+				x1++;
+				extra--;
+			}
 		}
+
 
 		/* draw shadow */
 		if (sc >= 0) {
