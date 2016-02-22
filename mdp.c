@@ -87,6 +87,7 @@ static int mode = MODE_MENU;
 static int mode_changed = 1;
 static int current_mod;
 static int ofs_y, blit_y;
+static int menu_fade_in;
 
 static struct xmp_module_info mi;
 
@@ -239,7 +240,6 @@ void update_menu_screen()
 
 	SDL_BlitSurface(menu_screen, &r0, screen, &r);
 	//SDL_UpdateRect(screen, 64, 0, 512, 480);
-	SDL_Flip(screen);
 }
 
 void collect_ystart()
@@ -272,16 +272,23 @@ void collect_ystart()
 	}
 }
 
-void prepare_menu_screen()
+static void draw_menu_borders()
 {
-	struct menu_entry *e;
-	int i, j, ypos, ystart, yend;
+	int i;
 
 	setcolor(9);
 	for (i = 0; i < MENU_HEIGHT; i++) {
 		drawhline(screen, 0, i, 64);
 		drawhline(screen, 576, i, 64);
 	}
+}
+
+void prepare_menu_screen()
+{
+	struct menu_entry *e;
+	int i, j, ypos, ystart, yend;
+
+	draw_menu_borders();
 
 	/* fill background */
 	for (i = 0; i < 960; i++) {
@@ -519,19 +526,38 @@ static void process_events()
 	}
 }
 
-
 #define STEP 3
+#define FADE_STEP 16
 
 static void draw_menu_screen()
 {
+	int flip = 0;
+
 	if (blit_y > STEP) {
 		blit_y -= STEP;
 		update_menu_screen();
+		flip = 1;
 	} else if (blit_y < -STEP) {
 		blit_y += STEP;
 		update_menu_screen();
+		flip = 1;
 	} else {
 		blit_y = 0;
+	}
+
+	if (menu_fade_in > FADE_STEP) {
+		menu_fade_in -= FADE_STEP;
+		draw_menu_borders();
+		update_menu_screen();
+		set_alpha(black_screen, menu_fade_in);
+		SDL_BlitSurface(black_screen, 0, screen, 0);
+		flip = 1;
+	} else {
+		menu_fade_in = 0;
+	}
+
+	if (flip) {
+		SDL_Flip(screen);
 	}
 }
 
@@ -654,6 +680,7 @@ int main(int argc, char **argv)
 
 	ofs_y = 0;
 	current_mod = 0;
+	menu_fade_in = 255;
 	collect_ystart();
 
 	ctx = xmp_create_context();

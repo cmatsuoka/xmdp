@@ -4,6 +4,7 @@
 
 SDL_Surface *screen;
 SDL_Surface *menu_screen;
+SDL_Surface *black_screen;	/* for fade in/fade out */
 
 static int palette[] = {
     0x00, 0x00, 0x00,	/*  0 */	0x3f, 0x3f, 0x25,	/*  1 */
@@ -225,6 +226,17 @@ int init_video()
 			screen->format->BytesPerPixel * 8,
 			screen->format->Rmask, screen->format->Gmask,
 			screen->format->Bmask, screen->format->Amask);
+
+	black_screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 480, 
+			screen->format->BytesPerPixel * 8,
+			screen->format->Rmask, screen->format->Gmask,
+			screen->format->Bmask, screen->format->Amask);
+
+	/* fill black screen */
+	for (i = 0; i < 480; i++) {
+		setcolor(0);
+		drawhline(black_screen, 0, i, 640);
+	}
 
 	if (menu_screen == NULL) {
 		fprintf(stderr, "sdl: can't create menu surface: %s\n",

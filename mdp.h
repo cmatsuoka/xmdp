@@ -25,6 +25,7 @@ struct menu {
 
 extern SDL_Surface *screen;
 extern SDL_Surface *menu_screen;
+extern SDL_Surface *black_screen;
 extern struct menu menu;
 
 void setcolor(int);
