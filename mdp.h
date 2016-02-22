@@ -30,7 +30,7 @@ extern struct menu menu;
 void setcolor(int);
 void drawhline(SDL_Surface *, int, int, int);
 void drawvline(SDL_Surface *, int, int, int);
-void fill(SDL_Surface *);
+void set_alpha(SDL_Surface *, int);
 int init_video(void);
 int msg(SDL_Surface *, struct font_header *, int, int, char *, int, int, int);
 int msglen(struct font_header *, char *);

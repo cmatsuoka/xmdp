@@ -235,4 +235,7 @@ int init_video()
 	return 0;
 }
 
-
+void set_alpha(SDL_Surface *surf, int alpha)
+{
+	SDL_SetAlpha(surf, SDL_RLEACCEL | SDL_SRCALPHA, alpha);
+}
