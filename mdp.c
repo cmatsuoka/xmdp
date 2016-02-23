@@ -85,11 +85,15 @@ static int end_of_player = 0;
 static int volume;
 static int mode = MODE_MENU;
 static int mode_changed = 1;
-static int start_mod;
 static int current_mod;
 static int ofs_y, blit_y;
 static int menu_fade_in;
 static int menu_fade_out;
+
+#define ACTION_PLAY	0
+#define ACTION_SWITCH	1
+#define ACTION_QUIT	2
+static int action;
 
 static struct xmp_module_info mi;
 
@@ -445,7 +449,7 @@ static void process_menu_events(int key)
 		}
 		break;
 	case SDLK_RETURN:
-		start_mod = 1;
+		action = ACTION_PLAY;
 		menu_fade_out = 255;
 		break;
 	}
@@ -502,12 +506,18 @@ static void process_events()
 
 		switch (key) {
 		case SDLK_F10:
-			xmp_stop_module(ctx);
-			SDL_PauseAudio(paused = 0);
-			end_of_player = 1;
+			if (mode == MODE_MENU) {
+				action = ACTION_QUIT;
+				menu_fade_out = 255;
+			} else {
+				xmp_stop_module(ctx);
+				SDL_PauseAudio(paused = 0);
+				end_of_player = 1;
+			}
 			break;
 		case SDLK_ESCAPE:
 			if (mode == MODE_MENU) {
+				action = ACTION_SWITCH;
 				menu_fade_out = 255;
 			} else {
 				switch_to_menu();
@@ -566,21 +576,28 @@ static void draw_menu_screen()
 		fade(black_screen, 255 - menu_fade_out);
 		flip = 1;
 	} else if (menu_fade_out > 0) {
+		char *filename;
+
 		menu_fade_out = 0;
 
-		if (start_mod) {
-			char *filename;
-
-			start_mod = 0;
+		switch (action) {
+		case ACTION_PLAY:
 			stop_player();
 			filename = menu.entry[current_mod].filename;
 			if (start_player(filename) < 0) {
 				perror(filename);
 			}
+			switch_to_player();
+			break;
+		case ACTION_SWITCH:
+			switch_to_player();
+			break;
+		case ACTION_QUIT:
+			xmp_stop_module(ctx);
+			SDL_PauseAudio(paused = 0);
+			end_of_player = 1;
 		}
 
-		switch_to_player();
-        	//shadowmsg(screen, &font1, 10, 26, mi.mod->name, 15, 0, -1);
 		flip = 1;
 	}
 
@@ -709,8 +726,8 @@ int main(int argc, char **argv)
 	}
 
 	ofs_y = 0;
+	action = 0;
 	current_mod = 0;
-	start_mod = 0;
 	menu_fade_in = 255;
 	collect_ystart();
 
