@@ -13,7 +13,8 @@ Motion's Journey I and II, and Skaven's Chaotic Mind musicdisks.
 Xmdp is being published mostly as an example of an application using libxmp.
 It can become more intersting once it becomes a full MDP clone (so maybe one
 day we can have it loading the original MDI files and playing the old DOS
-musicdisks).
+musicdisks). [Feb/2016 update: Yay! 19 years later, I finally added MDI file
+parsing and a menu mode, so you finally have your full MDP clone.]
 
 Until then, it's only a retro-looking module player.
 
