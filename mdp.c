@@ -62,8 +62,8 @@ struct channel_info {
 #define justifymsg(surf,f,x,y,s,c,sc,b) 				\
     msg(surf,f,x,y,s,c,b,sc,512-6);					\
 
-#define rightmsg(surf,f,x,y,s,c,b)					\
-    writemsg(surf, f, (x) - msglen(f,s), y, s, c, b)
+#define rightmsg(surf,f,x,y,s,c,sc,b)					\
+    msg(surf, f, (x) - msglen(f,s), y, s, c, b, sc, -1)
 
 #define update_counter(a,b,y) {						\
     if (mode_changed || (a) != (b)) {					\
@@ -338,7 +338,7 @@ void prepare_menu_screen()
 		shadowmsg(menu_screen, &font1, 2, ypos, e->title, c, sc, -1);
 
 		/* year */
-		rightmsg(menu_screen, &font2, 510, ypos, e->year, c, -1);
+		rightmsg(menu_screen, &font2, 510, ypos, e->year, c, sc, -1);
 
 		ypos += 4;
 
@@ -398,10 +398,10 @@ void prepare_player_screen()
 	drawhline(screen, 10, 57, 129);
 	drawvline(screen, 10, 57, 9);
 
-	rightmsg(screen, &font2, 500, 36, "Spacebar to pause", 14, -1);
-	rightmsg(screen, &font2, 500, 52, "+/- to change volume", 14, -1);
-	rightmsg(screen, &font2, 500, 20, "F10 to quit", 14, -1);
-	rightmsg(screen, &font2, 500, 68, "Arrows to change pattern", 14, -1);
+	rightmsg(screen, &font2, 500, 36, "Spacebar to pause", 14, -1, -1);
+	rightmsg(screen, &font2, 500, 52, "+/- to change volume", 14, -1, -1);
+	rightmsg(screen, &font2, 500, 20, "F10 to quit", 14, -1, -1);
+	rightmsg(screen, &font2, 500, 68, "Arrows to change pattern", 14, -1, -1);
 	writemsg(screen, &font2, 540, 20, "Ord", 14, -1);
 	writemsg(screen, &font2, 540, 36, "Pat", 14, -1);
 	writemsg(screen, &font2, 540, 52, "Row", 14, -1);
