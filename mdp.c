@@ -315,7 +315,7 @@ void prepare_menu_screen()
 
 	/* write entries */
 	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
-		int c;
+		int c, sc;
 
 		ypos += 40;
 		e = &menu.entry[j];
@@ -323,13 +323,15 @@ void prepare_menu_screen()
 		if (j == current_mod) {
 			setwhitecolor(15);
 			c = 15;
+			sc = 19;
 		} else {
 			setwhitecolor(16);
 			c = 16;
+			sc = 20;
 		}
 
 		/* title */
-		shadowmsg(menu_screen, &font1, 2, ypos, e->title, c, 0, -1);
+		shadowmsg(menu_screen, &font1, 2, ypos, e->title, c, sc, -1);
 
 		/* year */
 		rightmsg(menu_screen, &font2, 510, ypos, e->year, c, -1);
@@ -346,9 +348,9 @@ void prepare_menu_screen()
 
 			ypos += 18;
 			if (e->comment[i][0] == '$') {
-				justifymsg(menu_screen, &font2, 2, ypos, e->comment[i] + 1, c, 0, -1);
+				justifymsg(menu_screen, &font2, 2, ypos, e->comment[i] + 1, c, sc, -1);
 			} else {
-				shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], c, 0, -1);
+				shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], c, sc, -1);
 			}
 		}
 	}
