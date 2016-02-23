@@ -29,6 +29,7 @@ extern SDL_Surface *black_screen;
 extern struct menu menu;
 
 void setcolor(int);
+void setwhitecolor(int);
 void drawhline(SDL_Surface *, int, int, int);
 void drawvline(SDL_Surface *, int, int, int);
 void set_alpha(SDL_Surface *, int);

@@ -6,7 +6,9 @@ SDL_Surface *screen;
 SDL_Surface *menu_screen;
 SDL_Surface *black_screen;	/* for fade in/fade out */
 
-static int palette[] = {
+#define NUM_COLORS 20
+
+static int palette[NUM_COLORS * 3] = {
     0x00, 0x00, 0x00,	/*  0 */	0x3f, 0x3f, 0x25,	/*  1 */
     0x3f, 0x3b, 0x12,	/*  2 */	0x3f, 0x34, 0x00,	/*  3 */
     0x3f, 0x29, 0x00,	/*  4 */	0x3f, 0x1f, 0x00,	/*  5 */
@@ -14,16 +16,26 @@ static int palette[] = {
     0x0d, 0x0d, 0x0d,	/*  8 */	0x0b, 0x10, 0x15,	/*  9 */
     0x0b, 0x15, 0x1a,	/* 10 */	0x05, 0x08, 0x10,	/* 11 */
     0x20, 0x34, 0x34,	/* 12 */	0x10, 0x14, 0x32,	/* 13 */
-    0x15, 0x1e, 0x27,	/* 14 */	0xff, 0xff, 0xff	/* 15 */
+    0x15, 0x1e, 0x27,	/* 14 */	0x3f, 0x3f, 0x3f,	/* 15 */
+
+    /* Extra colors */
+    0x3a, 0x3a, 0x3f,	/* 16 */	0x27, 0x3e, 0x3f,	/* 17 */
+    0x20, 0x20, 0x20,	/* 18 */	0x00, 0x00, 0x00	/* 19 */
 };
 
-static SDL_Color color[16];
-static Uint32 mapped_color[16];
+static SDL_Color color[NUM_COLORS];
+static Uint32 mapped_color[NUM_COLORS];
 static int __color;
+static int __white_color;
 
 void setcolor(int c)
 {
 	__color = c;
+}
+
+void setwhitecolor(int c)
+{
+	__white_color = c;
 }
 
 static inline void put_pixel(SDL_Surface *surf, int x, int y, int c)
@@ -183,7 +195,7 @@ int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, 
 		if (*s == '@') {	/* @word@ is printed in white */
 			if (c > 0) {
 				if (c == color)
-					c = 15;
+					c = __white_color;
 				else
 					c = color;
 			}
@@ -269,7 +281,7 @@ int init_video()
 
 	SDL_WM_SetCaption("xmdp", "xmdp");
 
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < NUM_COLORS; i++) {
 		color[i].r = palette[i * 3] << 2;
 		color[i].g = palette[i * 3 + 1] << 2;
 		color[i].b = palette[i * 3 + 2] << 2;

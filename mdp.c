@@ -286,6 +286,7 @@ void prepare_menu_screen()
 	struct menu_entry *e;
 	int i, j, ypos, ystart, yend;
 
+	setwhitecolor(16);
 	draw_menu_borders();
 
 	/* fill background */
@@ -314,24 +315,40 @@ void prepare_menu_screen()
 
 	/* write entries */
 	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
+		int c;
+
 		ypos += 40;
 		e = &menu.entry[j];
 
+		if (j == current_mod) {
+			setwhitecolor(15);
+			c = 15;
+		} else {
+			setwhitecolor(16);
+			c = 16;
+		}
+
 		/* title */
-		shadowmsg(menu_screen, &font1, 2, ypos, e->title, 15, 0, -1);
+		shadowmsg(menu_screen, &font1, 2, ypos, e->title, c, 0, -1);
 
 		/* year */
-		rightmsg(menu_screen, &font2, 510, ypos, e->year, 15, -1);
+		rightmsg(menu_screen, &font2, 510, ypos, e->year, c, -1);
 
 		ypos += 4;
 
 		/* comment lines */
 		for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
+			int c = 12;
+
+			if (j == current_mod) {
+				c = 17;
+			}
+
 			ypos += 18;
 			if (e->comment[i][0] == '$') {
-				justifymsg(menu_screen, &font2, 2, ypos, e->comment[i] + 1, 12, 0, -1);
+				justifymsg(menu_screen, &font2, 2, ypos, e->comment[i] + 1, c, 0, -1);
 			} else {
-				shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], 12, 0, -1);
+				shadowmsg(menu_screen, &font2, 2, ypos, e->comment[i], c, 0, -1);
 			}
 		}
 	}
@@ -345,7 +362,9 @@ void prepare_player_screen()
 
 	memset(screen->pixels, 0, screen->w * screen->h * screen->format->BytesPerPixel);
 
+	setwhitecolor(15);
 	setcolor(10);
+
 	drawhline(screen, 0, 0, 640);
 	drawhline(screen, 0, 1, 640);
 	setcolor(9);
