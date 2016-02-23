@@ -89,6 +89,7 @@ static int current_mod;
 static int ofs_y, blit_y;
 static int menu_fade_in;
 static int menu_fade_out;
+static int standalone = 0;
 
 #define ACTION_PLAY	0
 #define ACTION_SWITCH	1
@@ -524,6 +525,11 @@ static void process_events()
 			}
 			break;
 		case SDLK_ESCAPE:
+			if (standalone) {
+				xmp_stop_module(ctx);
+				SDL_PauseAudio(paused = 0);
+				end_of_player = 1;
+			}
 			if (mode == MODE_MENU) {
 				action = ACTION_SWITCH;
 				menu_fade_out = 255;
@@ -721,13 +727,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (parse_mdi() < 0) {
-		if (!argv[optind]) {
-			usage();
-			exit(1);
-		}
-	}
-
 	if (sound_init(SRATE, 2) < 0) {
 		fprintf(stderr, "%s: can't initialize sound\n", argv[0]);
 		exit(1);
@@ -737,11 +736,11 @@ int main(int argc, char **argv)
 	action = 0;
 	current_mod = 0;
 	menu_fade_in = 255;
-	collect_ystart();
 
 	ctx = xmp_create_context();
 
 	if (argv[optind] != NULL) {
+		standalone = 1;
 		if (start_player(argv[optind]) < 0) {
 			fprintf(stderr, "%s: can't load %s\n", argv[0], argv[optind]);
 			goto err1;
@@ -750,7 +749,20 @@ int main(int argc, char **argv)
 
 	init_video();
 	SDL_PollEvent(0);		/* otherwise screen starts blank */
-	prepare_menu_screen();
+
+	if (standalone) {
+		switch_to_player();
+	} else {
+		if (parse_mdi() < 0) {
+			if (!argv[optind]) {
+				usage();
+				exit(1);
+			}
+		}
+
+		collect_ystart();
+		prepare_menu_screen();
+	}
 	
 	while (!end_of_player) {
 		process_events();
