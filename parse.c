@@ -1,9 +1,35 @@
 #include <stdio.h>
+#include <dirent.h>
 #include "mdp.h"
 
 #define LINE_SIZE 80
 
 struct menu menu;
+
+
+int match_filename(char *filename, char *name, size_t n)
+{
+	DIR *d;
+	struct dirent *ent;
+
+	if ((d = opendir(".")) == NULL) {
+		return -1;
+	}
+
+	while ((ent = readdir(d)) != NULL) {
+		if (!strcasecmp(filename, ent->d_name)) {
+			strncpy(name, ent->d_name, n);
+			closedir(d);
+			return 0;
+		}
+	}
+
+	strncpy(name, filename, n);
+	closedir(d);
+
+	return -1;
+
+}
 
 static char *copy_trim(char *s)
 {
@@ -23,9 +49,12 @@ int parse_mdi()
 {
 	FILE *f;
 	char line[LINE_SIZE];
+	char name[FILENAME_SIZE];
 	int i, j;
 
-	f = fopen("mdp.mdi", "r");
+	match_filename("mdp.mdi", name, FILENAME_SIZE);
+	
+	f = fopen(name, "r");
 	if (f == NULL) {
 		perror("xmdp");
 		return -1;

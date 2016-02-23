@@ -203,11 +203,14 @@ void draw_progress(int pos)
 			drawvline(screen, 11 + i, 58, 7);
 	}
 	oldpos = pos;
-	//SDL_UpdateRect(screen, 11, 58, 127, 7);
 }
 
 int start_player(char *filename)
 {
+	char name[FILENAME_SIZE];
+
+	match_filename(filename, name, FILENAME_SIZE);
+
 	if (xmp_load_module(ctx, filename) < 0) {
 		return -1;
 	}
