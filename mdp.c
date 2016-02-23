@@ -51,16 +51,16 @@ struct channel_info {
 
 
 #define writemsg(surf,f,x,y,s,c,b)					\
-    msg(surf,f,x,y,s,c,b,-1,-1,-1)
+    msg(surf,f,x,y,s,c,b,-1,-1)
 
 #define shadowmsg(surf,f,x,y,s,c,sc,b)					\
-    msg(surf,f,x,y,s,c,b,sc,-1,-1)
+    msg(surf,f,x,y,s,c,b,sc,-1)
 
 #define centermsg(surf,f,x,y,s,c,b)					\
     shadowmsg(surf, f, (x) - msglen(f,s) / 2, y, s, c, 0, b)
 
 #define justifymsg(surf,f,x,y,s,c,sc,b) 				\
-    msg(surf,f,x,y,s,c,b,sc,512-6-msglen(f,s),numspaces(s));		\
+    msg(surf,f,x,y,s,c,b,sc,512-6);					\
 
 #define rightmsg(surf,f,x,y,s,c,b)					\
     writemsg(surf, f, (x) - msglen(f,s), y, s, c, b)
@@ -101,19 +101,6 @@ static struct xmp_module_info mi;
 static float interpolate(float in)
 {
 	return in >= 0.0f ? in * in * in : -in * in * in;
-}
-
-static int numspaces(char *s)
-{
-	int n;
-
-	for (n = 0; *s; s++) {
-		if (*s == ' ') {
-			n++;
-		}
-	}
-
-	return n;
 }
 
 void draw_lines(int i, int a, int b, int c)

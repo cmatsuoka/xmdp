@@ -146,16 +146,39 @@ int writechar(SDL_Surface *surf, struct font_header *f, int x, int y, char s, in
 	return x1;
 }
 
-int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b, int sc, int len, int numsp)
+static int numspaces(char *s)
+{
+	int n;
+
+	for (n = 0; *s; s++) {
+		if (*s == ' ') {
+			n++;
+		}
+	}
+
+	return n;
+}
+
+int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, int b, int sc, int len)
 {
 	int x1 = 0, y1;
 	int color = c;
-	int sp = len / numsp;		/* justification spacing */
-	int extra = len % numsp;	/* extra spacing */
+	int sp = 0, extra = 0;		/* justification spacing */
 
-	if (s == NULL || *s == 0)
+	if (s == NULL || *s == 0) {
 		return 0;
+	}
 
+	/* justify message */
+	if (len > 0) {
+		int numsp = numspaces(s);
+		if (numsp > 0) {
+			len -= msglen(f, s);
+			sp = len / numsp;
+			extra = len % numsp;
+		}
+	}
+	
 	for (; *s; s++) {
 		if (*s == '@') {	/* @word@ is printed in white */
 			if (c > 0) {
