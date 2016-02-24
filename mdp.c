@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <xmp.h>
 #include "mdp.h"
 
@@ -585,7 +585,10 @@ static void draw_menu_screen()
 	}
 
 	if (flip) {
-		SDL_Flip(screen);
+		SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		SDL_RenderPresent(renderer);
 	}
 }
 
@@ -633,7 +636,11 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	}
 
 	draw_bars();
-	SDL_Flip(screen);
+
+	SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
+	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderPresent(renderer);
 
 	mode_changed = 0;
 }

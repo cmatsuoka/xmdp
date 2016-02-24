@@ -1,7 +1,7 @@
 #ifndef MDP_H_
 #define MDP_H_
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include "font.h"
 
 #define MAX_ENTRIES 30
@@ -25,6 +25,8 @@ struct menu {
 	int num_entries;
 };
 
+extern SDL_Renderer *renderer;
+extern SDL_Texture *texture;
 extern SDL_Surface *screen;
 extern SDL_Surface *menu_screen;
 extern SDL_Surface *black_screen;

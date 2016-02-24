@@ -1,7 +1,10 @@
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include "mdp.h"
 #include "font.h"
 
+SDL_Window *window;
+SDL_Renderer *renderer;
+SDL_Texture *texture;
 SDL_Surface *screen;
 SDL_Surface *menu_screen;
 SDL_Surface *black_screen;	/* for fade in/fade out */
@@ -22,7 +25,6 @@ static int palette[NUM_COLORS * 3] = {
     0x07, 0x0a, 0x08	/* 20 */
 };
 
-static SDL_Color color[NUM_COLORS];
 static Uint32 mapped_color[NUM_COLORS];
 static int __color;
 static int __white_color;
@@ -39,40 +41,14 @@ void setwhitecolor(int c)
 
 static inline void put_pixel(SDL_Surface *surf, int x, int y, int c)
 {
-	Uint32 pixel;
-	Uint8 *bits, bpp;
+	Uint8 *bits;
 
 	if (x < 0 || x >= surf->w || y < 0 || y > surf->h) {
 		return;
 	}
 
-	pixel = mapped_color[c];
-
-	bpp = surf->format->BytesPerPixel;
-	bits = ((Uint8 *) surf->pixels) + y * surf->pitch + x * bpp;
-
-	/* Set the pixel */
-	switch (bpp) {
-	case 1:
-		*(Uint8 *)(bits) = pixel;
-		break;
-	case 2:
-		*((Uint16 *) (bits)) = (Uint16) pixel;
-		break;
-	case 3:{
-		Uint8 r, g, b;
-		r = (pixel >> surf->format->Rshift) & 0xff;
-		g = (pixel >> surf->format->Gshift) & 0xff;
-		b = (pixel >> surf->format->Bshift) & 0xff;
-		*((bits) + surf->format->Rshift / 8) = r;
-		*((bits) + surf->format->Gshift / 8) = g;
-		*((bits) + surf->format->Bshift / 8) = b;
-		}
-		break;
-	case 4:
-		*((Uint32 *)(bits)) = (Uint32)pixel;
-		break;
-	}
+	bits = ((Uint8 *) surf->pixels) + y * surf->pitch + x * 4;
+	*((Uint32 *)(bits)) = mapped_color[c];
 }
 
 static inline void drawpixel(SDL_Surface *surf, int x, int y)
@@ -234,7 +210,20 @@ int msg(SDL_Surface *surf, struct font_header *f, int x, int y, char *s, int c, 
 
 int init_video()
 {
-	int i, mode;
+	int i;
+	Uint32 rmask, gmask, bmask, amask;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	rmask = 0xff000000;
+	gmask = 0x00ff0000;
+	bmask = 0x0000ff00;
+	amask = 0x000000ff;
+#else
+	rmask = 0x000000ff;
+	gmask = 0x0000ff00;
+	bmask = 0x00ff0000;
+	amask = 0xff000000;
+#endif
     
 	if (SDL_Init(SDL_INIT_VIDEO /*| SDL_INIT_AUDIO*/) < 0) {
 		fprintf(stderr, "sdl: can't initialize: %s\n",
@@ -242,29 +231,36 @@ int init_video()
 		return -1;
 	}
 
-	mode = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_ANYFORMAT;
-
 #if 0
 	if (opt.fullscreen)
 		mode |= SDL_FULLSCREEN;
 #endif
 
-	if ((screen = SDL_SetVideoMode(640, 480, 8, mode)) == NULL) {
-		fprintf(stderr, "sdl: can't set video mode: %s\n",
-			SDL_GetError());
+	if ((window = SDL_CreateWindow("xmdp", SDL_WINDOWPOS_UNDEFINED,
+                        SDL_WINDOWPOS_UNDEFINED, 640, 480,
+			SDL_WINDOW_OPENGL)) == NULL) {
+		fprintf(stderr, "sdl: can't create window: %s\n", SDL_GetError());
 		return -1;
 	}
 	atexit(SDL_Quit);
 
-	menu_screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 512, 960, 
-			screen->format->BytesPerPixel * 8,
-			screen->format->Rmask, screen->format->Gmask,
-			screen->format->Bmask, screen->format->Amask);
+	if ((renderer = SDL_CreateRenderer(window, -1, 0)) == NULL) {
+		fprintf(stderr, "sdl: can't create renderer: %s\n", SDL_GetError());
+		return -1;
+	}
 
-	black_screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 480, 
-			screen->format->BytesPerPixel * 8,
-			screen->format->Rmask, screen->format->Gmask,
-			screen->format->Bmask, screen->format->Amask);
+	if ((texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                               SDL_TEXTUREACCESS_STREAMING, 640, 480)) == NULL) {
+		fprintf(stderr, "sdl: can't create texture: %s\n", SDL_GetError());
+		return -1;
+	}
+
+	screen = SDL_CreateRGBSurface(0, 640, 480, 32,
+					rmask, gmask, bmask, amask);
+	menu_screen = SDL_CreateRGBSurface(0, 512, 960, 32,
+					rmask, gmask, bmask, amask);
+	black_screen = SDL_CreateRGBSurface(0, 640, 480, 32,
+					rmask, gmask, bmask, amask);
 
 	/* fill black screen */
 	for (i = 0; i < 480; i++) {
@@ -278,21 +274,17 @@ int init_video()
 		return -1;
 	}
 
-	SDL_WM_SetCaption("xmdp", "xmdp");
-
 	for (i = 0; i < NUM_COLORS; i++) {
-		color[i].r = palette[i * 3] << 2;
-		color[i].g = palette[i * 3 + 1] << 2;
-		color[i].b = palette[i * 3 + 2] << 2;
-		mapped_color[i] = SDL_MapRGB(screen->format,
-			color[i].r, color[i].g, color[i].b);
+		Uint8 r = palette[i * 3] << 2;
+		Uint8 g = palette[i * 3 + 1] << 2;
+		Uint8 b = palette[i * 3 + 2] << 2;
+		mapped_color[i] = SDL_MapRGB(screen->format, r, g, b);
 	}
-	SDL_SetColors(screen, color, 0, 16);
 
 	return 0;
 }
 
 void set_alpha(SDL_Surface *surf, int alpha)
 {
-	SDL_SetAlpha(surf, SDL_RLEACCEL | SDL_SRCALPHA, alpha);
+	SDL_SetSurfaceAlphaMod(surf, alpha);
 }
