@@ -241,7 +241,6 @@ void update_menu_screen()
 	SDL_Rect r = { 64, 0, 512, MENU_HEIGHT };
 
 	SDL_BlitSurface(menu_screen, &r0, screen, &r);
-	//SDL_UpdateRect(screen, 64, 0, 512, 480);
 }
 
 void collect_ystart()
@@ -435,7 +434,7 @@ static void process_menu_events(int key)
 {
 	int ystart, yend;
 
-	if (blit_y > 0) {
+	if (blit_y != 0) {
 		return;
 	}
 
