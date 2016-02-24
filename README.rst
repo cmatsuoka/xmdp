@@ -7,7 +7,7 @@ if they still compile. Sometimes we fix something or add a feature or two
 just for fun. For 19 years, this one was lying around incomplete, and now
 I finally decided to finish it.
 
-.. image: screenshot.png
+.. image:: screenshot.png
 
 This is a clone of the Future Crew MusicDiskPlayer released in 1993 with
 Journey 1/2 and Chaotic Mind. The player interface clone was written in 1997
