@@ -30,7 +30,7 @@
 #include <xmp.h>
 #include "mdp.h"
 
-#define VERSION "1.4.0"
+#define VERSION "1.5.0"
 #define MAX_TIMER 1600		/* Expire time */
 #define SRATE 44100		/* Sampling rate */
 
@@ -106,14 +106,11 @@ static float interpolate(float in)
 
 void draw_lines(int i, int a, int b, int c)
 {
-	//int y = a;
-
 	setcolor(c);
 	i = i * 16 + 1;
 	for (; a < b; a++) {
 		drawhline(screen, i, a, 13);
 	}
-	//SDL_UpdateRect(screen, i, y, 13, a - y + 1);
 }
 
 void draw_bars()
