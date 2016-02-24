@@ -1,2 +1,8 @@
 *.o
 xmdp
+*.s3m
+*.mod
+*.mdi
+*.S3M
+*.MOD
+*.MDI
