@@ -45,6 +45,36 @@ static char *copy_trim(char *s)
 	return strdup(s);
 }
 
+static void collect_ystart()
+{
+	struct menu_entry *e;
+	int i, j, ypos;
+
+	ypos = 0;
+
+	/* write titles */
+	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
+		ypos += 20;
+	}
+
+	ypos += 5;
+
+	/* write entries */
+	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
+		ypos += 40;
+		e = &menu.entry[j];
+
+		e->ystart = ypos - 18;
+
+		ypos += 4;
+		for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
+			ypos += 18;
+		}
+
+		e->yend = ypos + 8;
+	}
+}
+
 int parse_mdi()
 {
 	FILE *f;
@@ -104,6 +134,8 @@ int parse_mdi()
 
 	fgets(line, LINE_SIZE, f);
 	menu.lastline = copy_trim(line);
+
+	collect_ystart();
 
 	return 0;
 }

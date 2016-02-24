@@ -2,7 +2,7 @@
 An MDP clone using libxmp
 =========================
 
-Some of us have old projects which we dust off every few years just to see
+Some of us have old projects which we dust off every few years to see
 if they still compile. Sometimes we fix something or add a feature or two
 just for fun. For 19 years, this one was lying around incomplete, and now
 I finally decided to finish it.

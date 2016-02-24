@@ -240,36 +240,6 @@ void update_menu_screen()
 	SDL_BlitSurface(menu_screen, &r0, screen, &r);
 }
 
-void collect_ystart()
-{
-	struct menu_entry *e;
-	int i, j, ypos;
-
-	ypos = 0;
-
-	/* write titles */
-	for (i = 0; menu.titles[i] && i < MAX_TITLES; i++) {
-		ypos += 20;
-	}
-
-	ypos += 5;
-
-	/* write entries */
-	for (j = 0; menu.entry[j].filename && j < MAX_ENTRIES; j++) {
-		ypos += 40;
-		e = &menu.entry[j];
-
-		e->ystart = ypos - 18;
-
-		ypos += 4;
-		for (i = 0; e->comment[i] && i < MAX_COMMENT; i++) {
-			ypos += 18;
-		}
-
-		e->yend = ypos + 8;
-	}
-}
-
 static void draw_menu_borders()
 {
 	int i;
@@ -759,7 +729,6 @@ int main(int argc, char **argv)
 			}
 		}
 
-		collect_ystart();
 		prepare_menu_screen();
 	}
 	
