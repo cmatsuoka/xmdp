@@ -1,8 +1,9 @@
 /* xmdp written by Claudio Matsuoka and Hipolito Carraro Jr
  * Original MDP.EXE for DOS by Future Crew
  *
- * 1.5.0: Added MDI parser and song selector
- * 1.4.0: Ported to libxmp 4.1 with sdl sound
+ * 1.5.1: Ported to SDL2 (Feb/2016)
+ * 1.5.0: Added MDI parser and song selector (Feb/2016)
+ * 1.4.0: Ported to libxmp 4.1 with sdl sound (2013)
  * 1.3.0: Ported to libxmp 4.0
  * 1.2.0: Ported to xmp 3.0 and sdl
  * 1.1.0: Raw keys handled by Russel Marks' rawkey functions
@@ -30,7 +31,7 @@
 #include <xmp.h>
 #include "mdp.h"
 
-#define VERSION "1.5.0"
+#define VERSION "1.5.1"
 #define MAX_TIMER 1600		/* Expire time */
 #define SRATE 44100		/* Sampling rate */
 
