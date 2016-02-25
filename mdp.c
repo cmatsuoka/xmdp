@@ -1,8 +1,9 @@
 /* xmdp written by Claudio Matsuoka and Hipolito Carraro Jr
  * Original MDP.EXE for DOS by Future Crew
  *
- * 1.5.0: Added MDI parser and song selector
- * 1.4.0: Ported to libxmp 4.1 with sdl sound
+ * 1.5.1: Ported to SDL2 (Feb/2016)
+ * 1.5.0: Added MDI parser and song selector (Feb/2016)
+ * 1.4.0: Ported to libxmp 4.1 with sdl sound (2013)
  * 1.3.0: Ported to libxmp 4.0
  * 1.2.0: Ported to xmp 3.0 and sdl
  * 1.1.0: Raw keys handled by Russel Marks' rawkey functions
@@ -26,11 +27,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <xmp.h>
 #include "mdp.h"
 
-#define VERSION "1.5.0"
+#define VERSION "1.5.1"
 #define MAX_TIMER 1600		/* Expire time */
 #define SRATE 44100		/* Sampling rate */
 
@@ -383,6 +384,7 @@ static void switch_to_player()
 	if (mode == MODE_MENU) {
 		mode = MODE_PLAYER;
 		prepare_player_screen();
+		set_alpha(texture, 255);
 		mode_changed = 1;
 	}
 }
@@ -517,16 +519,14 @@ static void process_events()
 	}
 }
 
-static void fade(SDL_Surface *surf, int val)
+static void fade(int val)
 {
-	draw_menu_borders();
 	update_menu_screen();
-	set_alpha(surf, val);
-	SDL_BlitSurface(black_screen, 0, screen, 0);
+	set_alpha(texture, val);
 }
 
-#define STEP 3
-#define FADE_STEP 24
+#define STEP 4
+#define FADE_STEP 16
 
 static void draw_menu_screen()
 {
@@ -548,7 +548,7 @@ static void draw_menu_screen()
 
 	if (menu_fade_in > FADE_STEP) {
 		menu_fade_in -= FADE_STEP;
-		fade(black_screen, menu_fade_in);
+		fade(255 - menu_fade_in);
 		flip = 1;
 	} else if (menu_fade_in > 0) {
 		menu_fade_in = 0;
@@ -556,7 +556,7 @@ static void draw_menu_screen()
 
 	if (menu_fade_out > FADE_STEP) {
 		menu_fade_out -= FADE_STEP;
-		fade(black_screen, 255 - menu_fade_out);
+		fade(menu_fade_out);
 		flip = 1;
 	} else if (menu_fade_out > 0) {
 		char *filename;
@@ -585,7 +585,10 @@ static void draw_menu_screen()
 	}
 
 	if (flip) {
-		SDL_Flip(screen);
+		SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, NULL, NULL);
+		SDL_RenderPresent(renderer);
 	}
 }
 
@@ -633,7 +636,11 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	}
 
 	draw_bars();
-	SDL_Flip(screen);
+
+	SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
+	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderPresent(renderer);
 
 	mode_changed = 0;
 }
