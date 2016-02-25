@@ -43,7 +43,7 @@ static inline void put_pixel(SDL_Surface *surf, int x, int y, int c)
 {
 	Uint8 *bits;
 
-	if (x < 0 || x >= surf->w || y < 0 || y > surf->h) {
+	if (x < 0 || x >= surf->w || y < 0 || y >= surf->h) {
 		return;
 	}
 
