@@ -611,8 +611,12 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	update_counter(volume, vol, 68);
 
 	if (fi->row != row) {
-		draw_progress(pos * 126 / mi->mod->len +
-			      fi->row * 126 / mi->mod->len / fi->num_rows);
+		int t = fi->time;
+		int duration = mi->seq_data[0].duration;
+		if (t > duration) {
+			t = duration;
+		}
+		draw_progress(t * 126 / duration);
 	}
 	update_counter(fi->row, row, 52);
 
