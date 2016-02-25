@@ -525,7 +525,7 @@ static void fade(int val)
 	set_alpha(texture, val);
 }
 
-#define STEP 3
+#define STEP 4
 #define FADE_STEP 16
 
 static void draw_menu_screen()
