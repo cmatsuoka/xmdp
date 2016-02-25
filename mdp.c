@@ -208,7 +208,7 @@ int start_player(char *filename)
 
 	match_filename(filename, name, FILENAME_SIZE);
 
-	if (xmp_load_module(ctx, filename) < 0) {
+	if (xmp_load_module(ctx, name) < 0) {
 		return -1;
 	}
 
