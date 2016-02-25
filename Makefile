@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -O3 -Wall
+CFLAGS = -O0 -g -Wall
 LD = gcc
 LDFLAGS =
 LIBS = -lxmp -lm -lSDL2

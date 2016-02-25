@@ -255,18 +255,12 @@ int init_video()
 		return -1;
 	}
 
+	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+
 	screen = SDL_CreateRGBSurface(0, 640, 480, 32,
 					rmask, gmask, bmask, amask);
 	menu_screen = SDL_CreateRGBSurface(0, 512, 960, 32,
 					rmask, gmask, bmask, amask);
-	black_screen = SDL_CreateRGBSurface(0, 640, 480, 32,
-					rmask, gmask, bmask, amask);
-
-	/* fill black screen */
-	for (i = 0; i < 480; i++) {
-		setcolor(0);
-		drawhline(black_screen, 0, i, 640);
-	}
 
 	if (menu_screen == NULL) {
 		fprintf(stderr, "sdl: can't create menu surface: %s\n",
@@ -284,7 +278,7 @@ int init_video()
 	return 0;
 }
 
-void set_alpha(SDL_Surface *surf, int alpha)
+void set_alpha(SDL_Texture *text, int alpha)
 {
-	SDL_SetSurfaceAlphaMod(surf, alpha);
+	SDL_SetTextureAlphaMod(text, alpha);
 }
