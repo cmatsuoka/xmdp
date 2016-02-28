@@ -1,9 +1,9 @@
 
 CC = gcc
-CFLAGS = -O0 -g -Wall
+CFLAGS = -O3 -Wall
 LD = gcc
 LDFLAGS =
-LIBS = -lxmp -lm -lSDL2
+LIBS = -lxmp -lSDL2
 
 ifeq (Darwin,$(shell uname -s))
 	CFLAGS += -I/usr/local/include
