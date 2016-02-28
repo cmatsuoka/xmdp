@@ -36,6 +36,7 @@ void setwhitecolor(int);
 void drawhline(SDL_Surface *, int, int, int);
 void drawvline(SDL_Surface *, int, int, int);
 void set_alpha(SDL_Texture *, int);
+void render_screen(SDL_Texture *, SDL_Surface *);
 int init_video(void);
 int msg(SDL_Surface *, struct font_header *, int, int, char *, int, int, int, int);
 int msglen(struct font_header *, char *);

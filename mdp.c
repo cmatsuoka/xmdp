@@ -478,6 +478,14 @@ static void process_events()
 	while (SDL_PollEvent(&event) > 0) {
 		int key;
 
+		if (event.type == SDL_WINDOWEVENT) {
+			switch (event.window.event) {
+			case SDL_WINDOWEVENT_RESIZED:
+				render_screen(texture, screen);
+				break;
+			}
+		}
+
 		if (event.type != SDL_KEYDOWN) {
 			continue;
 		}
@@ -586,9 +594,7 @@ static void draw_menu_screen()
 	}
 
 	if (flip) {
-		SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
-		SDL_RenderCopy(renderer, texture, NULL, NULL);
-		SDL_RenderPresent(renderer);
+		render_screen(texture, screen);
 	}
 }
 
@@ -641,9 +647,7 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 
 	draw_bars();
 
-	SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
-	SDL_RenderCopy(renderer, texture, NULL, NULL);
-	SDL_RenderPresent(renderer);
+	render_screen(texture, screen);
 
 	mode_changed = 0;
 }

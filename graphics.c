@@ -238,11 +238,13 @@ int init_video()
 
 	if ((window = SDL_CreateWindow("xmdp", SDL_WINDOWPOS_UNDEFINED,
                         SDL_WINDOWPOS_UNDEFINED, 640, 480,
-			SDL_WINDOW_OPENGL)) == NULL) {
+			SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE)) == NULL) {
 		fprintf(stderr, "sdl: can't create window: %s\n", SDL_GetError());
 		return -1;
 	}
 	atexit(SDL_Quit);
+
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
 	if ((renderer = SDL_CreateRenderer(window, -1, 0)) == NULL) {
 		fprintf(stderr, "sdl: can't create renderer: %s\n", SDL_GetError());
@@ -282,4 +284,11 @@ int init_video()
 void set_alpha(SDL_Texture *text, int alpha)
 {
 	SDL_SetTextureAlphaMod(text, alpha);
+}
+
+void render_screen(SDL_Texture *text, SDL_Surface *surf)
+{
+	SDL_UpdateTexture(text, NULL, surf->pixels, 640 * sizeof (Uint32));
+	SDL_RenderCopy(renderer, text, NULL, NULL);
+	SDL_RenderPresent(renderer);
 }
