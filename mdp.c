@@ -523,6 +523,7 @@ static void fade(int val)
 {
 	update_menu_screen();
 	set_alpha(texture, val);
+	SDL_RenderClear(renderer);
 }
 
 #define STEP 4
@@ -586,7 +587,6 @@ static void draw_menu_screen()
 
 	if (flip) {
 		SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
-		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, NULL, NULL);
 		SDL_RenderPresent(renderer);
 	}
@@ -642,7 +642,6 @@ static void draw_player_screen(struct xmp_module_info *mi, struct xmp_frame_info
 	draw_bars();
 
 	SDL_UpdateTexture(texture, NULL, screen->pixels, 640 * sizeof (Uint32));
-	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
 
