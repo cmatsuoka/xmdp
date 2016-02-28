@@ -471,6 +471,18 @@ static void process_player_events(int key)
 	}
 }
 
+static void close_window()
+{
+	if (mode == MODE_MENU) {
+		action = ACTION_QUIT;
+		menu_fade_out = 255;
+	} else {
+		xmp_stop_module(ctx);
+		SDL_PauseAudio(paused = 0);
+		end_of_player = 1;
+	}
+}
+
 static void process_events()
 {
 	SDL_Event event;
@@ -483,6 +495,9 @@ static void process_events()
 			case SDL_WINDOWEVENT_RESIZED:
 				render_screen(texture, screen);
 				break;
+			case SDL_WINDOWEVENT_CLOSE:
+				close_window();
+				break;
 			}
 		}
 
@@ -494,22 +509,12 @@ static void process_events()
 
 		switch (key) {
 		case SDLK_F10:
-			if (mode == MODE_MENU) {
-				action = ACTION_QUIT;
-				menu_fade_out = 255;
-			} else {
-				xmp_stop_module(ctx);
-				SDL_PauseAudio(paused = 0);
-				end_of_player = 1;
-			}
+			close_window();
 			break;
 		case SDLK_ESCAPE:
 			if (standalone) {
-				xmp_stop_module(ctx);
-				SDL_PauseAudio(paused = 0);
-				end_of_player = 1;
-			}
-			if (mode == MODE_MENU) {
+				close_window();
+			} else if (mode == MODE_MENU) {
 				action = ACTION_SWITCH;
 				menu_fade_out = 255;
 			} else {
@@ -561,6 +566,7 @@ static void draw_menu_screen()
 		flip = 1;
 	} else if (menu_fade_in > 0) {
 		menu_fade_in = 0;
+		fade(255);
 	}
 
 	if (menu_fade_out > FADE_STEP) {
@@ -571,6 +577,7 @@ static void draw_menu_screen()
 		char *filename;
 
 		menu_fade_out = 0;
+		fade(0);
 
 		switch (action) {
 		case ACTION_PLAY:

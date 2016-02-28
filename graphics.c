@@ -259,6 +259,7 @@ int init_video()
 
 	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 	SDL_GL_SetSwapInterval(1);
+	SDL_RenderClear(renderer);
 
 	screen = SDL_CreateRGBSurface(0, 640, 480, 32,
 					rmask, gmask, bmask, amask);
