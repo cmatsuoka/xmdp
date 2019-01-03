@@ -1,0 +1,41 @@
+name: xmdp
+base: core18
+version: git
+summary: An MDP clone using libxmp
+description: |
+  xmdp is a clone of the Future Crew MusicDiskPlayer (released in 1993 with
+  the Journey 1/2 and Chaotic Mind musicdisks) using libxmp to render module
+  data.
+
+grade: devel
+confinement: strict
+
+apps:
+  xmdp:
+    command: xmdp
+    plugs:
+      - home
+      - alsa
+      - pulseaudio
+      - x11
+      - wayland
+      - opengl
+    environment:
+      LD_LIBRARY_PATH: $SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
+
+parts:
+  xmdp:
+    source: .
+    plugin: make
+    artifacts: [xmdp]
+    build-packages:
+      - gcc
+      - make
+      - libsdl2-dev
+      - libxmp-dev
+      - libpulse-dev
+    stage-packages:
+      - libsdl2-2.0-0
+      - libxmp4
+      - libpulse0
+      - libgl1
