@@ -1,6 +1,7 @@
 name: xmdp
 base: core18
 version: git
+license: Unlicense
 summary: An MDP clone using libxmp
 description: |
   xmdp is a clone of the Future Crew MusicDiskPlayer (released in 1993 with
