@@ -6,7 +6,8 @@ summary: An MDP clone using libxmp
 description: |
   xmdp is a clone of the Future Crew MusicDiskPlayer (released in 1993 with
   the Journey 1/2 and Chaotic Mind musicdisks) using libxmp to render module
-  data.
+  data. Besides being a music disk player, it can also be used to play
+  stand-alone module files.
 
 grade: devel
 confinement: strict
