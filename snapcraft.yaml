@@ -8,7 +8,7 @@ description: |
   data. Besides being a music disk player, it can also be used to play
   stand-alone module files.
 
-grade: devel
+grade: stable
 confinement: strict
 
 architectures:
@@ -27,8 +27,10 @@ apps:
       - x11
       - wayland
       - opengl
+      - audio-playback
     environment:
       LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+      LIBGL_DRIVERS_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/dri
 
 parts:
   xmdp:

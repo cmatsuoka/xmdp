@@ -17,7 +17,7 @@ of concept, it's not pretty. But I can live with that.
 
 To build xmdp you need SDL2 and libxmp 4.3. It was tested on Linux and
 Mac OS X. After building, run the xmdp binary from the directory where
-your .mdi file and modules are. Everything should work like MDP. If not,
+your .mdi file and modules are. Everything should work like in MDP. If not,
 send me an email and I'll try to fix it.
 
 Have fun.
